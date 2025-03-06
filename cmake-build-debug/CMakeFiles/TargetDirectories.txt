@@ -1,0 +1,3 @@
+C:/Users/mc_ondros/CLionProjects/c_chess/cmake-build-debug/CMakeFiles/c_chess.dir
+C:/Users/mc_ondros/CLionProjects/c_chess/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/mc_ondros/CLionProjects/c_chess/cmake-build-debug/CMakeFiles/rebuild_cache.dir
