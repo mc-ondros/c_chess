@@ -1,54 +1,86 @@
-#include <wchar.h>
 #include <stdio.h>
-#include <string.h>
+#include <wchar.h>
+#include <locale.h>
 #include "chess.h"
 
-// Global board declaration (defined in chess.h as extern)
+// The board array
 wchar_t board[8][8];
 
-// Global move history declaration
-char moveHistory[4096] = "";
+// Move history
+char moveHistory[4096] = {0};
 
+// Function to initialize the chess board with pieces
 void createBoard() {
-    for(int i = 0; i < 8; i++) {
-        for(int j = 0; j < 8; j++) {
-            if (i == 0) {
-                if (j == 0 || j == 7) board[i][j] = white_rook;
-                if (j == 1 || j == 6) board[i][j] = white_knight;
-                if (j == 2 || j == 5) board[i][j] = white_bishop;
-                if (j == 3) board[i][j] = white_queen;
-                if (j == 4) board[i][j] = white_king;
-            }
-
-            if (i == 1) board[i][j] = white_pawn;
-
-            if (i > 1 && i < 6) board[i][j] = 0;
-
-            if (i == 6) board[i][j] = black_pawn;
-            if (i == 7) {
-                if(j == 0 || j == 7) board[i][j] = black_rook;
-                if(j == 1 || j == 6) board[i][j] = black_knight;
-                if(j == 2 || j == 5) board[i][j] = black_bishop;
-                if(j == 3) board[i][j] = black_queen;
-                if(j == 4) board[i][j] = black_king;
-            }
+    // Initialize the entire board to empty
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            board[row][col] = 0;
         }
     }
+
+    // Set up pawns
+    for (int col = 0; col < 8; col++) {
+        board[1][col] = white_pawn;
+        board[6][col] = black_pawn;
+    }
+
+    // Set up other pieces
+    board[0][0] = board[0][7] = white_rook;
+    board[0][1] = board[0][6] = white_knight;
+    board[0][2] = board[0][5] = white_bishop;
+    board[0][3] = white_queen;
+    board[0][4] = white_king;
+
+    board[7][0] = board[7][7] = black_rook;
+    board[7][1] = board[7][6] = black_knight;
+    board[7][2] = board[7][5] = black_bishop;
+    board[7][3] = black_queen;
+    board[7][4] = black_king;
 }
 
+// Function to print the chess board with borders and aligned rows/columns
 void printBoard() {
-    wprintf(L"  a b c d e f g h\n");
-    wprintf(L"  ---------------\n");
-    for (int i = 7; i >= 0; i--) {
-        wprintf(L"%d|", i + 1);
-        for (int j = 0; j < 8; j++) {
-            if (board[i][j] == 0) {
-                wprintf(L"  ");
+    // Print the column labels on top
+    wprintf(L"     a   b   c   d   e   f   g   h  \n");
+    
+    // Top border
+    wprintf(L"   ┌───┬───┬───┬───┬───┬───┬───┬───┐\n");
+    
+    // Print each row
+    for (int row = 7; row >= 0; row--) {
+        // Row number and left border
+        wprintf(L" %d │", row + 1);
+        
+        // Print the cells in the current row
+        for (int col = 0; col < 8; col++) {
+            wchar_t piece = board[row][col];
+            if (piece) {
+                wprintf(L" %lc", piece);
             } else {
-                wprintf(L"%lc ", board[i][j]);
+                // Empty square with alternating pattern
+                if ((row + col) % 2 == 0) {
+                    wprintf(L" · ");
+                } else {
+                    wprintf(L"   ");
+                }
+            }
+
+            // Cell separator or right border
+            if (col < 7) {
+                wprintf(L"│");
+            } else {
+                wprintf(L"│ %d\n", row + 1);
             }
         }
-        wprintf(L"\n");
+        
+        // Row separator or bottom border
+        if (row > 0) {
+            wprintf(L"   ├───┼───┼───┼───┼───┼───┼───┼───┤\n");
+        } else {
+            wprintf(L"   └───┴───┴───┴───┴───┴───┴───┴───┘\n");
+        }
     }
-}
 
+    // Print the column labels at the bottom
+    wprintf(L"     a   b   c   d   e   f   g   h  \n");
+}

@@ -21,6 +21,26 @@ void setApiKey(const char* key) {
     api_key[sizeof(api_key) - 1] = '\0';
 }
 
+char* find_pattern(const char *text) {
+    while (*text && *(text + 1) && *(text + 2) && *(text + 3)) {
+        if (isalpha(text[0]) && isdigit(text[1]) && isalpha(text[2]) && isdigit(text[3])) {
+            // Allocate memory for the result (4 characters + null terminator)
+            char *result = (char *)malloc(5 * sizeof(char));
+            if (!result) {
+                return NULL;  // Memory allocation failed
+            }
+            result[0] = text[0];
+            result[1] = text[1];
+            result[2] = text[2];
+            result[3] = text[3];
+            result[4] = '\0';  // Null-terminate the string
+            return result;
+        }
+        text++;  // Move to the next character
+    }
+    return NULL;  // No match found
+}
+
 // Get the API key
 const char* getApiKey() {
     return api_key;
@@ -50,31 +70,11 @@ static int extractMove(const char *response, int *fromRow, int *fromCol, int *to
     // Look for patterns like e2e4, a7a5, etc.
     char movePattern[5] = {0};
 
-    // Search for a move pattern like "e2e4" in the response
-    // This is simplified and may need improvement for real-world use
-    char *ptr = strstr(response, "move as black");
-    if (!ptr) return 0;
-
-    // Look for a simple 4-character pattern that could be a chess move
-    while (*ptr) {
-        if (isalpha(*ptr) && isdigit(*(ptr+1)) && isalpha(*(ptr+2)) && isdigit(*(ptr+3)) &&
-            *ptr >= 'a' && *ptr <= 'h' && *(ptr+2) >= 'a' && *(ptr+2) <= 'h' &&
-            *(ptr+1) >= '1' && *(ptr+1) <= '8' && *(ptr+3) >= '1' && *(ptr+3) <= '8') {
-
-            strncpy(movePattern, ptr, 4);
-            movePattern[4] = '\0';
-            break;
-        }
-        ptr++;
-    }
-
-    if (movePattern[0] == 0) return 0;
-
     // Convert chess notation to indices
-    *fromCol = movePattern[0] - 'a';
-    *fromRow = movePattern[1] - '1';
-    *toCol = movePattern[2] - 'a';
-    *toRow = movePattern[3] - '1';
+    *fromCol = response[0] - 'a';
+    *fromRow = response[1] - '1';
+    *toCol = response[2] - 'a';
+    *toRow = response[3] - '1';
 
     return 1;
 }
@@ -164,10 +164,10 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
             // Extract the black's move from the response
-            success = extractMove(response.data, fromRow, fromCol, toRow, toCol);
+            success = extractMove(find_pattern(response.data), fromRow, fromCol, toRow, toCol);
             if (!success) {
                 printf("Error: Failed to extract move from API response\n");
-                printf("API response: %s\n", response.data);
+                printf("API response: %s\n", find_pattern(response.data));
             }
         }
 
