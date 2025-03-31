@@ -21,6 +21,7 @@ int main(void) {
     
     while (1) {
         printf("\n%s's turn\n", playerTurn ? "White" : "Black");
+        printMoveHistory(); // Display the move history
         
         if (!readMove(&fromRow, &fromCol, &toRow, &toCol)) {
             printf("Invalid input format. Use format like e2e4.\n");

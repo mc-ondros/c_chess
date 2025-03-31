@@ -1,9 +1,13 @@
 #include <wchar.h>
 #include <stdio.h>
+#include <string.h>
 #include "chess.h"
 
 // Global board declaration (defined in chess.h as extern)
 wchar_t board[8][8];
+
+// Global move history declaration
+char moveHistory[4096] = "";
 
 void createBoard() {
     for(int i = 0; i < 8; i++) {
@@ -47,3 +51,4 @@ void printBoard() {
         wprintf(L"\n");
     }
 }
+
