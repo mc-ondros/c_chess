@@ -49,39 +49,6 @@ From the build directory:
 ./c_chess
 ```
 
-## How to Play
-
-Use the following controls to play the game:
-
-- Select a piece: Arrow keys to navigate + Enter to select
-- Choose destination: Arrow keys to navigate + Enter to move
-- Special commands during gameplay:
-  - `s`: Save current game state
-  - `l`: Load a previously saved game
-  - `u`: Undo last move
-  - `r`: Restart game
-  - `q`: Quit game
-  - `h`: Show help screen
-
-## Project Structure
-
-```
-c_chess/
-├── src/               # Source files
-│   ├── main.c         # Entry point
-│   ├── board.c        # Chess board representation
-│   ├── moves.c        # Move generation and validation
-│   ├── pieces.c       # Chess piece definitions
-│   ├── io.c           # Input/output handling
-│   └── ai.c           # Simple AI implementation
-├── include/           # Header files
-├── tests/             # Test files
-├── assets/            # Visual assets
-├── examples/          # Example games
-├── CMakeLists.txt     # CMake build configuration
-└── README.md          # This file
-```
-
 ## Technical Implementation
 
 This chess game is built with the following design considerations:
