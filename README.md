@@ -19,11 +19,8 @@ You can customize the AI's personality to adjust its playing style and difficult
 - **Standard Chess Rules:** Play with all the traditional chess rules including castling, en passant, and pawn promotion.
 - **Command-line Interface:** Simple and intuitive CLI for easy interaction and control.
 - **Save and Load Game:** Save your game progress and load it later to continue your match.
-- **Basic AI Opponent:** Challenge yourself against a basic AI opponent powered by the Gemini engine.
+- **AI Opponent:** Challenge yourself against an AI opponent powered by the Gemini engine .
 - **Move Validation:** Ensures all moves are legal according to chess rules.
-- **Undo Functionality:** Undo your last move if you make a mistake.
-- **Highlight Possible Moves:** Visual aid to highlight all possible moves for a selected piece.
-- **Customizable Board:** Customize the board setup for unique and varied gameplay.
 - **AI Personality Customization:** Adjust the AI's playing style and difficulty.
 - **Move Rating:** Request the AI to rate your moves and provide feedback.
 
