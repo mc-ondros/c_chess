@@ -15,6 +15,14 @@ struct ResponseData {
     size_t size;
 };
 
+// Add this near your api_key declaration
+static char ai_personality[512] = ""; // Store AI personality
+
+// Add this function to set the personality
+void setAiPersonality(const char* personality) {
+    strncpy(ai_personality, personality, sizeof(ai_personality) - 1);
+    ai_personality[sizeof(ai_personality) - 1] = '\0';
+}
 // Set the API key
 void setApiKey(const char* key) {
     strncpy(api_key, key, sizeof(api_key) - 1);
@@ -95,18 +103,22 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
     }
 
     // Prepare the prompt for Gemini API
-    char base_prompt[] = "Let's play a game of chess. I will play as white. "
-                         "Start with the standard initial chess position. "
-                         "After each of my moves, you will: "
-                         "Validate the move according to standard chess rules. "
-                         "I will tell you only legal moves. "
-                         "Then, you will make your move as black, telling me the piece position "
-                         "and move position (e.g. e2e4). "
-                         "Provide the board state in standard FEN notation after your move. "
-                         "Maintain the game state throughout our interaction. "
-                         "Inform me if a checkmate, stalemate, or draw occurs, and explain the outcome. "
-                         "Please do not provide any commentary or analysis beyond the requested information, "
-                         "unless I ask for it. Respond only with the move.";
+    char base_prompt[1024];
+    snprintf(base_prompt, sizeof(base_prompt),
+        "Let's play a game of chess. I will play as white. "
+        "You will play as black with the following personality: %s. "
+        "Start with the standard initial chess position. "
+        "After each of my moves, you will: "
+        "Validate the move according to standard chess rules. "
+        "I will tell you only legal moves. "
+        "Then, you will make your move as black, telling me the piece position "
+        "and move position (e.g. e2e4). "
+        "Provide the board state in standard FEN notation after your move. "
+        "Maintain the game state throughout our interaction. "
+        "Inform me if a checkmate, stalemate, or draw occurs, and explain the outcome. "
+        "Please do not provide any commentary or analysis beyond the requested information, "
+        "unless I ask for it. Respond only with the move.",
+        ai_personality[0] ? ai_personality : "a skilled chess player");
 
     // Create the complete prompt with the move history
     char *prompt = malloc(strlen(base_prompt) + strlen(moveHistory) + 100);

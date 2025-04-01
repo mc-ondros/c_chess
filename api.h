@@ -6,6 +6,9 @@ void loadApiKey();
 // Get the current API key
 const char *getApiKey();
 
+void setAiPersonality(const char* personality);
+// Set the AI personality for the API
+
 // Disable SSL certificate verification (less secure)
 void disableSSLVerification();
 

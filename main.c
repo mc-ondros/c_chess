@@ -23,8 +23,20 @@ int main(void) {
     _setmode(_fileno(stdout), _O_TEXT);
     printf("API support enabled. Black will use the Gemini API for moves.\n");
     printf("If you see errors, check your API key in main.c\n\n");
+
+    char personality[512];
+    printf("Enter AI personality for the black player (e.g., 'aggressive', 'cautious', 'beginner'):\n");
+    fgets(personality, sizeof(personality), stdin);
+    // Remove newline if present
+    size_t len = strlen(personality);
+    if (len > 0 && personality[len-1] == '\n') {
+        personality[len-1] = '\0';
+    }
+    setAiPersonality(personality);
+    printf("Black player set to play with '%s' personality.\n", personality);
     _setmode(_fileno(stdout), _O_U16TEXT);
     #endif
+
 
     createBoard();
     printBoard();
