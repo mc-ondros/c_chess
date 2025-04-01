@@ -25,7 +25,7 @@ int main(void) {
     printf("If you see errors, check your API key in main.c\n\n");
 
     char personality[512];
-    printf("Enter Gemini personality for the black player (e.g., 'aggressive', 'cautious', 'beginner'):\n");
+    printf("Enter Gemini personality for the black player, the more detailed the better (e.g., 'aggressive', 'cautious', 'beginner'):\n");
     fgets(personality, sizeof(personality), stdin);
     // Remove newline if present
     size_t len = strlen(personality);
