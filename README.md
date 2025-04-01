@@ -73,13 +73,7 @@ After building the project, you can run the chess game using the following comma
 
 ### Command-line Interface
 
+- **Specify AI Personality:** Enter the type of player you want the AI to be (e.g. 'beginner').
 - **Move a piece:** Enter the move in the format `e2e4` (move piece from e2 to e4).
+- **Let the AI rate your move:** Select y/n if you want the AI to rate your move.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgements
-
-- [Chess Programming Wiki](https://www.chessprogramming.org/Main_Page) for algorithms and data structures.
-- [CMake](https://cmake.org/) for build system management.
