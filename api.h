@@ -9,6 +9,8 @@ const char *getApiKey();
 void setAiPersonality(const char* personality);
 // Set the AI personality for the API
 
+// Rate a move with AI and display the rating
+void displayMoveRating(int fromRow, int fromCol, int toRow, int toCol);
 // Disable SSL certificate verification (less secure)
 void disableSSLVerification();
 

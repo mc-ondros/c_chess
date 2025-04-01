@@ -9,17 +9,17 @@
 
 int main(void) {
     setlocale(LC_ALL, "");
-    _setmode(_fileno(stdout), _O_U16TEXT);  // Enable Unicode output in Windows
+    _setmode(_fileno(stdout), _O_U16TEXT); // Enable Unicode output in Windows
 
     // Set the API key - replace this with your actual API key
     setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
 
-    #ifdef NO_CURL_SUPPORT
+#ifdef NO_CURL_SUPPORT
     _setmode(_fileno(stdout), _O_TEXT);  // Temporarily switch back for this message
     printf("NOTE: Building without API support. Black moves will use a simple fallback AI.\n");
     printf("To enable API support, install libcurl development files and rebuild.\n");
     _setmode(_fileno(stdout), _O_U16TEXT);  // Switch back to Unicode
-    #else
+#else
     _setmode(_fileno(stdout), _O_TEXT);
     printf("API support enabled. Black will use the Gemini API for moves.\n");
     printf("If you see errors, check your API key in main.c\n\n");
@@ -29,13 +29,13 @@ int main(void) {
     fgets(personality, sizeof(personality), stdin);
     // Remove newline if present
     size_t len = strlen(personality);
-    if (len > 0 && personality[len-1] == '\n') {
-        personality[len-1] = '\0';
+    if (len > 0 && personality[len - 1] == '\n') {
+        personality[len - 1] = '\0';
     }
     setAiPersonality(personality);
     printf("Black player set to play with '%s' personality.\n", personality);
     _setmode(_fileno(stdout), _O_U16TEXT);
-    #endif
+#endif
 
 
     createBoard();
@@ -104,8 +104,15 @@ int main(void) {
             // Undo the temporary move (we'll execute it properly later)
             board[fromRow][fromCol] = originalFrom;
             board[toRow][toCol] = originalTo;
-
         } else {
+            printf("Would you like an AI rating for this move? (y/n): ");
+            char response;
+            scanf(" %c", &response);
+            if (response == 'y' || response == 'Y') {
+                displayMoveRating(fromRow, fromCol, toRow, toCol);
+            }
+            // Clear input buffer
+            while (getchar() != '\n');
             // AI player (Black) - Use Gemini API
             printf("Waiting for AI to make a move...\n");
 

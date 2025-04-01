@@ -42,15 +42,15 @@ void createBoard() {
 void printBoard() {
     // Print the column labels on top
     wprintf(L"     a   b   c   d   e   f   g   h  \n");
-    
+
     // Top border
     wprintf(L"   ┌───┬───┬───┬───┬───┬───┬───┬───┐\n");
-    
+
     // Print each row
     for (int row = 7; row >= 0; row--) {
         // Row number and left border
         wprintf(L" %d │", row + 1);
-        
+
         // Print the cells in the current row
         for (int col = 0; col < 8; col++) {
             wchar_t piece = board[row][col];
@@ -72,7 +72,7 @@ void printBoard() {
                 wprintf(L"│ %d\n", row + 1);
             }
         }
-        
+
         // Row separator or bottom border
         if (row > 0) {
             wprintf(L"   ├───┼───┼───┼───┼───┼───┼───┼───┤\n");

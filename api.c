@@ -121,18 +121,20 @@ int rateMoveWithAI(const char *move,const char *moveHistory) {
         return 0;
     }
     // Prepare the prompt for Gemini API
-    char prompt[1024];
-    snprintf(prompt, sizeof(prompt),
-        "Considering this move history: %s "
-        "Rate the following chess move: %s. "
-        "Provide a score from 0 to 10, where 0 is a bad move and 10 is an excellent move.",
+    char *prompt = malloc(1024);
+    if (!prompt) {
+        printf("Error: Memory allocation failed!\n");
+        free(response.data);
+        return 0;
+    }
+    snprintf(prompt, sizeof(prompt)+256,
+        "Considering this move history: %s Rate the following chess move: %s. Provide a score from 0 to 10, where 0 is a bad move and 10 is an excellent move. Don't use any formatting, just plaintext.",
         moveHistory,move);
-
     char *payload = malloc(strlen(prompt) + 256);
     if (!payload) {
         printf("Error: Memory allocation failed!\n");
         free(response.data);
-        free(prompt);
+        free(payload);
         return 0;
     }
 
@@ -140,7 +142,7 @@ int rateMoveWithAI(const char *move,const char *moveHistory) {
 
     // Create the URL with the API key
     char url[512];
-    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent?key=%s", api_key);
+    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", api_key);
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
@@ -184,6 +186,40 @@ int rateMoveWithAI(const char *move,const char *moveHistory) {
     free(payload);
     return rating;
 }
+
+void displayMoveRating(int fromRow, int fromCol, int toRow, int toCol) {
+    // Convert move to chess notation
+    char moveStr[5];
+    sprintf(moveStr, "%c%d%c%d",
+            'a' + fromCol, fromRow + 1,
+            'a' + toCol, toRow + 1);
+
+    printf("Getting AI rating for move %s...\n", moveStr);
+
+    // Call AI to rate the move
+    int rating = rateMoveWithAI(moveStr, moveHistory);
+
+    // Display the rating with a descriptive message
+    if (rating == -1) {
+        printf("Failed to get a rating for this move.\n");
+    } else {
+        printf("AI rates this move as: %d/10", rating);
+
+        // Add a qualitative description based on the rating
+        if (rating >= 9) {
+            printf(" (Excellent move!)\n");
+        } else if (rating >= 7) {
+            printf(" (Good move)\n");
+        } else if (rating >= 5) {
+            printf(" (Average move)\n");
+        } else if (rating >= 3) {
+            printf(" (Questionable move)\n");
+        } else {
+            printf(" (Poor move)\n");
+        }
+    }
+}
+
 // Function to call the Gemini API and get black's move
 int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow, int* toCol) {
     CURL *curl;
@@ -241,7 +277,7 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
 
     // Create the URL with the API key
     char url[512];
-    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-exp-03-25:generateContent?key=%s", api_key);
+    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", api_key);
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
