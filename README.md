@@ -1,89 +1,88 @@
-# C Chess
+# C Chess Game
 
-![CMake](https://img.shields.io/badge/CMake-%23008FBA.svg?style=for-the-badge&logo=cmake&logoColor=white)
+![C](https://img.shields.io/badge/language-C-blue)
+![CMake](https://img.shields.io/badge/build-CMake-brightgreen)
+![License](https://img.shields.io/github/license/mc-ondros/c_chess)
+![Repo Size](https://img.shields.io/github/repo-size/mc-ondros/c_chess)
+![Last Commit](https://img.shields.io/github/last-commit/mc-ondros/c_chess)
 
-A fully-featured chess game implemented in C using a modular architecture. Play classic chess in your terminal with all standard rules and moves supported.
+## Description
+
+Welcome to the C Chess Game! This project is an engaging and educational chess game implemented entirely in C. It serves as an excellent example for learning game development, data structures, and algorithms in C. The project is built using CMake for better dependency management and build configuration.
+
+The game features a robust AI powered by the Gemini engine, offering a challenging experience for players of all levels. Whether you're a seasoned chess player or a beginner, this game provides an enjoyable and interactive way to sharpen your skills.
+
+You can customize the AI's personality to adjust its playing style and difficulty, making each game unique. Additionally, you can request the AI to rate your moves, providing valuable feedback to help you improve your chess strategies.
 
 ## Features
 
-- Complete implementation of chess rules
-- Terminal-based graphical interface
-- Support for standard chess notation
-- Move validation and legal move highlighting
-- Check and checkmate detection
-- Support for special moves (castling, en passant, pawn promotion)
-- Game state saving and loading
-- Move history and undo functionality
-- Simple AI opponent (optional)
+- **Standard Chess Rules:** Play with all the traditional chess rules including castling, en passant, and pawn promotion.
+- **Command-line Interface:** Simple and intuitive CLI for easy interaction and control.
+- **Save and Load Game:** Save your game progress and load it later to continue your match.
+- **Basic AI Opponent:** Challenge yourself against a basic AI opponent powered by the Gemini engine.
+- **Move Validation:** Ensures all moves are legal according to chess rules.
+- **Undo Functionality:** Undo your last move if you make a mistake.
+- **Highlight Possible Moves:** Visual aid to highlight all possible moves for a selected piece.
+- **Customizable Board:** Customize the board setup for unique and varied gameplay.
+- **AI Personality Customization:** Adjust the AI's playing style and difficulty.
+- **Move Rating:** Request the AI to rate your moves and provide feedback.
 
-## Requirements
+## Table of Contents
 
-- C compiler (GCC or Clang recommended)
-- CMake (version 3.12 or higher)
-- Make
-- Standard C libraries
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Acknowledgements](#acknowledgements)
 
-## Building from Source
+## Installation
 
-Clone the repository:
+### Prerequisites
 
-```bash
-git clone https://github.com/mc-ondros/c_chess.git
-cd c_chess
-```
+- C Compiler (GCC or Clang)
+- CMake
 
-Build using CMake:
+### Steps
 
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/mc-ondros/c_chess.git
+    cd c_chess
+    ```
 
-## Running the Game
+2. Create a build directory and navigate to it:
+    ```sh
+    mkdir build
+    cd build
+    ```
 
-From the build directory:
+3. Generate the build files using CMake:
+    ```sh
+    cmake ..
+    ```
 
-```bash
+4. Build the project:
+    ```sh
+    make
+    ```
+
+## Usage
+
+After building the project, you can run the chess game using the following command from the `build` directory:
+
+```sh
 ./c_chess
 ```
 
-## Technical Implementation
+### Command-line Interface
 
-This chess game is built with the following design considerations:
-
-- **Board Representation**: 8x8 grid using a 2D array or bitboards
-- **Move Generation**: Pre-calculated move tables for efficiency
-- **Game State**: Full position tracking with history for undo
-- **User Interface**: ASCII/Unicode character-based terminal UI
-- **AI**: Mini-max algorithm with alpha-beta pruning (basic implementation)
-
-## Future Improvements
-
-- Graphical interface using SDL or similar library
-- Network play functionality
-- Advanced AI with opening book
-- PGN format support for importing/exporting games
-- Time controls and chess clock
-- Tournament mode
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+- **Move a piece:** Enter the move in the format `e2e4` (move piece from e2 to e4).
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
+## Acknowledgements
 
-- Thanks to the classic chess literature and algorithms
-- Inspired by traditional command-line chess implementations
-- Chess piece Unicode characters for the terminal display
+- [Chess Programming Wiki](https://www.chessprogramming.org/Main_Page) for algorithms and data structures.
+- [CMake](https://cmake.org/) for build system management.
