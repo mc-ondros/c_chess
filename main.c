@@ -12,7 +12,7 @@ int main(void) {
     _setmode(_fileno(stdout), _O_U16TEXT); // Enable Unicode output in Windows
 
     // Set the API key - replace this with your actual API key
-    setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
+    setApiKey("");
 
 #ifdef NO_CURL_SUPPORT
     _setmode(_fileno(stdout), _O_TEXT);  // Temporarily switch back for this message
@@ -25,7 +25,7 @@ int main(void) {
     printf("If you see errors, check your API key in main.c\n\n");
 
     char personality[512];
-    printf("Enter AI personality for the black player (e.g., 'aggressive', 'cautious', 'beginner'):\n");
+    printf("Enter Gemini personality for the black player (e.g., 'aggressive', 'cautious', 'beginner'):\n");
     fgets(personality, sizeof(personality), stdin);
     // Remove newline if present
     size_t len = strlen(personality);
@@ -114,10 +114,10 @@ int main(void) {
             // Clear input buffer
             while (getchar() != '\n');
             // AI player (Black) - Use Gemini API
-            printf("Waiting for AI to make a move...\n");
+            printf("Waiting for Gemini to make a move...\n");
 
             if (!getBlackMove(moveHistory, &fromRow, &fromCol, &toRow, &toCol)) {
-                printf("Error: AI failed to make a valid move. Retrying...\n");
+                printf("Error: Gemini failed to make a valid move. Retrying...\n");
                 continue;
             }
 
