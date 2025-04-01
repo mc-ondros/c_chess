@@ -70,7 +70,7 @@ int readMove(int *fromRow, int *fromCol, int *toRow, int *toCol) {
         *toCol < 0 || *toCol > 7 || *toRow < 0 || *toRow > 7) {
         return 0;
     }
-    
+    rateMoveWithAI(input, moveHistory);
     return 1;
 }
 
