@@ -2,8 +2,7 @@
 #define C_CHESS_API_H
 
 // Set the API key to be used for API calls
-void setApiKey(const char *key);
-
+void loadApiKey();
 // Get the current API key
 const char *getApiKey();
 
