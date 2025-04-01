@@ -53,7 +53,7 @@ void printBoard() {
             if (piece) {
                 wprintf(L" %lc ", piece);
             } else {
-                wprintf(L" %lc ");
+                wprintf(L"   ");
             }
             if (col < 7) {
                 wprintf(L"│");

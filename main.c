@@ -12,7 +12,7 @@ int main(void) {
     _setmode(_fileno(stdout), _O_U16TEXT); // Enable Unicode output in Windows
 
     // Set the API key - replace this with your actual API key
-    setApiKey("");
+    setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
 
 #ifdef NO_CURL_SUPPORT
     _setmode(_fileno(stdout), _O_TEXT);  // Temporarily switch back for this message
