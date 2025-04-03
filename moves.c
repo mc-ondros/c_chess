@@ -53,7 +53,25 @@ int readMove(int *fromRow, int *fromCol, int *toRow, int *toCol) {
     if (scanf("%4s", input) != 1) {
         return 0;
     }
-    
+    if(strcmp(input, "exit")==0) {
+        printf("Exiting...\n");
+        exit(0);
+    }
+    if (strcmp(input, "save") == 0) {
+            char filename[100];
+            printf("Enter filename to save: ");
+            scanf("%99s", filename);
+            saveGame(filename);
+        exit(0);
+        }
+    if (strcmp(input, "load") == 0) {
+        char filename[100];
+        printf("Enter filename to load: ");
+        scanf("%99s", filename);
+        if (loadGame(filename)) {
+            printf("Game loaded\n");
+        }
+    }
     // Check if input is in the correct format
     if (strlen(input) != 4) {
         return 0;

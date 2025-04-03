@@ -53,26 +53,26 @@ int main(void) {
     int gameOver = 0;
 
     while (!gameOver) {
-        bool askForSave = 1;
-        if(askForSave) {
-            char command[20];
-            scanf("%s",command);
-            if (strcmp(command, "save") == 0) {
-                char filename[100];
-                printf("Enter filename to save: ");
-                scanf("%99s", filename);
-                saveGame(filename);
-            }
-            else if (strcmp(command, "load") == 0) {
-                char filename[100];
-                printf("Enter filename to load: ");
-                scanf("%99s", filename);
-                if (loadGame(filename)) {
-                }
-            }else if(strcmp(command, "play") == 0) {
-                askForSave = 0;
-            }
-        }
+        // bool askForSave = 1;
+        // if(askForSave) {
+        //     char command[20];
+        //     scanf("%s",command);
+        //     if (strcmp(command, "save") == 0) {
+        //         char filename[100];
+        //         printf("Enter filename to save: ");
+        //         scanf("%99s", filename);
+        //         saveGame(filename);
+        //     }
+        //     else if (strcmp(command, "load") == 0) {
+        //         char filename[100];
+        //         printf("Enter filename to load: ");
+        //         scanf("%99s", filename);
+        //         if (loadGame(filename)) {
+        //         }
+        //     }else if(strcmp(command, "play") == 0) {
+        //         askForSave = 0;
+        //     }
+        // }
         printf("\n%s's turn\n", playerTurn ? "White" : "Black");
         printMoveHistory(); // Display the move history
 
