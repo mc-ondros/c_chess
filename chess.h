@@ -23,6 +23,11 @@ extern wchar_t board[8][8];
 // Global move history
 extern char moveHistory[4096];
 
+// Add castling and en passant tracking variables
+extern int whiteKingMoved, whiteKingRookMoved, whiteQueenRookMoved;
+extern int blackKingMoved, blackKingRookMoved, blackQueenRookMoved;
+extern int enPassantTargetRow, enPassantTargetCol;
+
 // Functions
 void createBoard();
 void printBoard();

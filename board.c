@@ -9,6 +9,10 @@ wchar_t board[8][8];
 // Move history
 char moveHistory[4096] = {0};
 
+int whiteKingMoved = 0, whiteKingRookMoved = 0, whiteQueenRookMoved = 0;
+int blackKingMoved = 0, blackKingRookMoved = 0, blackQueenRookMoved = 0;
+int enPassantTargetRow = -1, enPassantTargetCol = -1;
+
 // Function to initialize the chess board with pieces
 void createBoard() {
     // Initialize the entire board to empty
