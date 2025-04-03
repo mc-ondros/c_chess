@@ -100,6 +100,8 @@ add_executable(c_chess
     moves.c
     api.c
     check.c
+    saveload.c
+        saveload.c
 )
 
 # If CURL is found, use it; otherwise, define a preprocessor macro to disable API features

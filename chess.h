@@ -43,4 +43,8 @@ void printMoveHistory();
 int isKingInCheck(int playerIsWhite);
 int isCheckMate(int playerIsWhite);
 
+// Save/Load functions
+int saveGame(const char* filename);
+int loadGame(const char* filename);
+
 #endif //C_CHESS_CHESS_H

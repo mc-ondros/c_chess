@@ -89,6 +89,14 @@ build CMakeFiles/c_chess.dir/check.c.obj: C_COMPILER__c_chess_unscanned_Debug C$
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
+build CMakeFiles/c_chess.dir/saveload.c.obj: C_COMPILER__c_chess_unscanned_Debug C$:/Users/mc_ondros/CLionProjects/c_chess/saveload.c || cmake_object_order_depends_target_c_chess
+  DEFINES = -DCURL_SUPPORT=1
+  DEP_FILE = CMakeFiles\c_chess.dir\saveload.c.obj.d
+  FLAGS = -g -std=gnu99 -fdiagnostics-color=always
+  INCLUDES = -ID:/curl-8.12.1_4-win64-mingw/include
+  OBJECT_DIR = CMakeFiles\c_chess.dir
+  OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target c_chess
@@ -97,7 +105,7 @@ build CMakeFiles/c_chess.dir/check.c.obj: C_COMPILER__c_chess_unscanned_Debug C$
 #############################################
 # Link the executable c_chess.exe
 
-build c_chess.exe: C_EXECUTABLE_LINKER__c_chess_Debug CMakeFiles/c_chess.dir/main.c.obj CMakeFiles/c_chess.dir/board.c.obj CMakeFiles/c_chess.dir/moves.c.obj CMakeFiles/c_chess.dir/api.c.obj CMakeFiles/c_chess.dir/check.c.obj | D$:/curl-8.12.1_4-win64-mingw/lib/libcurl.dll.a
+build c_chess.exe: C_EXECUTABLE_LINKER__c_chess_Debug CMakeFiles/c_chess.dir/main.c.obj CMakeFiles/c_chess.dir/board.c.obj CMakeFiles/c_chess.dir/moves.c.obj CMakeFiles/c_chess.dir/api.c.obj CMakeFiles/c_chess.dir/check.c.obj CMakeFiles/c_chess.dir/saveload.c.obj | D$:/curl-8.12.1_4-win64-mingw/lib/libcurl.dll.a
   FLAGS = -g
   LINK_LIBRARIES = D:/curl-8.12.1_4-win64-mingw/lib/libcurl.dll.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\c_chess.dir

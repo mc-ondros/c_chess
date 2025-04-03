@@ -75,9 +75,6 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *use
 
 // Function to extract the move from the API response
 static int extractMove(const char *response, int *fromRow, int *fromCol, int *toRow, int *toCol) {
-    // Look for patterns like e2e4, a7a5, etc.
-    char movePattern[5] = {0};
-
     // Convert chess notation to indices
     *fromCol = response[0] - 'a';
     *fromRow = response[1] - '1';
