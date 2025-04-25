@@ -7,6 +7,7 @@
 #include "saveload.h"  // Added for saveGame and loadGame functions
 
 #define BOARD_SIZE 8
+#define MAX_AI_RETRIES 3  // Maximum number of retry attempts
 
 // Global array of button widgets for board squares
 static GtkWidget *buttons[BOARD_SIZE][BOARD_SIZE];
@@ -22,6 +23,8 @@ static int gameMode = 2; // Default to two-player mode
 static GtkWidget *turnLabel;
 // Flag to prevent player from making moves during AI turn
 static int aiThinking = 0;
+// AI retry counter
+static int aiRetryCount = 0;
 
 // Function to display check message
 static void show_check_message(GtkWindow *parent, int currentPlayerInCheck) {
@@ -158,17 +161,83 @@ static gboolean process_ai_move(gpointer data) {
     int success = getBlackMove(moveHistory, &aiFromRow, &aiFromCol, &aiToRow, &aiToCol);
     
     if (success) {
-        executeMove(aiFromRow, aiFromCol, aiToRow, aiToCol);
+        // Verify that AI is attempting to move a black piece
+        wchar_t selectedPiece = board[aiFromRow][aiFromCol];
+        
+        if (selectedPiece == 0) {
+            // AI trying to move from an empty square
+            printf("AI Error: Tried to move from empty square [%d,%d]\n", aiFromRow, aiFromCol);
+            aiRetryCount++;
+        }
+        else if (!isPieceBlack(selectedPiece)) {
+            // AI trying to move a white piece or invalid piece
+            printf("AI Error: Tried to move a non-black piece: %d at [%d,%d]\n", 
+                   (int)selectedPiece, aiFromRow, aiFromCol);
+            aiRetryCount++;
+        }
+        else if (!isValidMove(aiFromRow, aiFromCol, aiToRow, aiToCol)) {
+            // AI trying an invalid move
+            printf("AI Error: Illegal move from [%d,%d] to [%d,%d]\n", 
+                   aiFromRow, aiFromCol, aiToRow, aiToCol);
+            aiRetryCount++;
+        }
+        else if (moveWouldExposeCheck(aiFromRow, aiFromCol, aiToRow, aiToCol, 0)) {
+            // AI trying a move that would put its king in check
+            printf("AI Error: Move would expose black king to check\n");
+            aiRetryCount++;
+        }
+        else {
+            // Valid move, execute it
+            printf("AI moving black %lc from [%d,%d] to [%d,%d]\n", 
+                   selectedPiece, aiFromRow, aiFromCol, aiToRow, aiToCol);
+            aiRetryCount = 0;
+            executeMove(aiFromRow, aiFromCol, aiToRow, aiToCol);
+            aiThinking = 0;
+            refresh_board();
+            return FALSE;
+        }
+        
+        // If we get here, the move was invalid but AI reported success
+        if (aiRetryCount < MAX_AI_RETRIES) {
+            // Update label to show retry attempt
+            gchar *retryText = g_strdup_printf("AI made invalid move. Retrying in 10s (%d/%d)...", 
+                                              aiRetryCount, MAX_AI_RETRIES);
+            gtk_label_set_text(GTK_LABEL(turnLabel), retryText);
+            g_free(retryText);
+            
+            // Schedule another attempt after 10 seconds
+            g_timeout_add_seconds(10, process_ai_move, NULL);
+            return FALSE;  // Remove this timeout
+        }
     } else {
+        // AI failed to generate a move
+        aiRetryCount++;
+    }
+    
+    // Handle retry or failure cases
+    if (aiRetryCount < MAX_AI_RETRIES) {
+        // Update label to show retry attempt
+        gchar *retryText = g_strdup_printf("AI failed. Retrying in 10s (%d/%d)...", 
+                                          aiRetryCount, MAX_AI_RETRIES);
+        gtk_label_set_text(GTK_LABEL(turnLabel), retryText);
+        g_free(retryText);
+        
+        // Schedule another attempt after 10 seconds
+        g_timeout_add_seconds(10, process_ai_move, NULL);
+    } else {
+        // All retry attempts exhausted, show error and give up
         GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-                                                 "AI failed to make a move.");
+                                                 "AI failed to make a move after %d attempts.", MAX_AI_RETRIES);
         gtk_window_set_title(GTK_WINDOW(dialog), "AI Move Error");
         gtk_dialog_run(GTK_DIALOG(dialog));
         gtk_widget_destroy(dialog);
+        
+        // Reset for next turn
+        aiRetryCount = 0;
+        aiThinking = 0;
+        refresh_board();
     }
     
-    aiThinking = 0;
-    refresh_board();
     return FALSE; // Return FALSE to remove the timeout
 }
 
@@ -258,6 +327,7 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
             } else if (gameMode == 1) {
                 // One-player mode: update turn label and call AI move after a short delay
                 aiThinking = 1;
+                aiRetryCount = 0;  // Reset retry counter for new AI turn
                 refresh_board();
                 
                 // Use a timeout to allow the UI to update before processing the AI move
