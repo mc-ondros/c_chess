@@ -99,6 +99,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
 link_directories(${GTK3_LIBRARY_DIRS})
 add_compile_options(${GTK3_CFLAGS_OTHER})
+include_directories(${GTK3_INCLUDE_DIRS})  # Added GTK3 include directories
 set(LIBRARIES ${LIBRARIES} ${GTK3_LIBRARIES})
 
 add_definitions(${GTK3_CFLAGS_OTHER})
@@ -112,6 +113,8 @@ add_executable(c_chess
         check.c
         saveload.c
         saveload.c
+        gui.c
+        gui.c
 )
 
 # If CURL is found, use it; otherwise, define a preprocessor macro to disable API features
@@ -179,8 +182,7 @@ if (CURL_FOUND)
                 message(STATUS "Found additional DLL: ${CURL_LIB_DIR}/../bin/${DLL_NAME}")
                 add_custom_command(TARGET c_chess POST_BUILD
                         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                        "${CURL_LIB_DIR}/../bin/${DLL_NAME}"
-                        $<TARGET_FILE_DIR:c_chess>)
+                        "${CURL_LIB_DIR}/../bin/${DLL_NAME}")
             endif ()
         endforeach ()
     endif ()
@@ -202,3 +204,4 @@ message(STATUS "Configuration summary:")
 message(STATUS "  API support: ${CURL_FOUND}")
 message(STATUS "  C Standard: ${CMAKE_C_STANDARD}")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
+

@@ -53,6 +53,7 @@ build CMakeFiles/c_chess.dir/main.c.obj: C_COMPILER__c_chess_unscanned_Debug C$:
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\main.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -60,6 +61,7 @@ build CMakeFiles/c_chess.dir/board.c.obj: C_COMPILER__c_chess_unscanned_Debug C$
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\board.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -67,6 +69,7 @@ build CMakeFiles/c_chess.dir/moves.c.obj: C_COMPILER__c_chess_unscanned_Debug C$
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\moves.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -74,6 +77,7 @@ build CMakeFiles/c_chess.dir/api.c.obj: C_COMPILER__c_chess_unscanned_Debug C$:/
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\api.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -81,6 +85,7 @@ build CMakeFiles/c_chess.dir/check.c.obj: C_COMPILER__c_chess_unscanned_Debug C$
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\check.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -88,6 +93,15 @@ build CMakeFiles/c_chess.dir/saveload.c.obj: C_COMPILER__c_chess_unscanned_Debug
   DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
   DEP_FILE = CMakeFiles\c_chess.dir\saveload.c.obj.d
   FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
+  OBJECT_DIR = CMakeFiles\c_chess.dir
+  OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
+
+build CMakeFiles/c_chess.dir/gui.c.obj: C_COMPILER__c_chess_unscanned_Debug C$:/Users/mc_ondros/CLionProjects/c_chess/gui.c || cmake_object_order_depends_target_c_chess
+  DEFINES = -DCURL_SUPPORT=1 -DLIBDEFLATE_DLL
+  DEP_FILE = CMakeFiles\c_chess.dir\gui.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always -DLIBDEFLATE_DLL
+  INCLUDES = -IC:/msys64/mingw64/include/gtk-3.0 -IC:/msys64/mingw64/include/pango-1.0 -IC:/msys64/mingw64/include/harfbuzz -IC:/msys64/mingw64/include/cairo -IC:/msys64/mingw64/include/freetype2 -IC:/msys64/mingw64/include/pixman-1 -IC:/msys64/mingw64/include/gdk-pixbuf-2.0 -IC:/msys64/mingw64/include/libpng16 -IC:/msys64/mingw64/include/webp -IC:/msys64/mingw64/include/atk-1.0 -IC:/msys64/mingw64/include/fribidi -IC:/msys64/mingw64/include/glib-2.0 -IC:/msys64/mingw64/lib/glib-2.0/include
   OBJECT_DIR = CMakeFiles\c_chess.dir
   OBJECT_FILE_DIR = CMakeFiles\c_chess.dir
 
@@ -99,7 +113,7 @@ build CMakeFiles/c_chess.dir/saveload.c.obj: C_COMPILER__c_chess_unscanned_Debug
 #############################################
 # Link the executable c_chess.exe
 
-build c_chess.exe: C_EXECUTABLE_LINKER__c_chess_Debug CMakeFiles/c_chess.dir/main.c.obj CMakeFiles/c_chess.dir/board.c.obj CMakeFiles/c_chess.dir/moves.c.obj CMakeFiles/c_chess.dir/api.c.obj CMakeFiles/c_chess.dir/check.c.obj CMakeFiles/c_chess.dir/saveload.c.obj | C$:/msys64/mingw64/lib/libcurl.dll.a
+build c_chess.exe: C_EXECUTABLE_LINKER__c_chess_Debug CMakeFiles/c_chess.dir/main.c.obj CMakeFiles/c_chess.dir/board.c.obj CMakeFiles/c_chess.dir/moves.c.obj CMakeFiles/c_chess.dir/api.c.obj CMakeFiles/c_chess.dir/check.c.obj CMakeFiles/c_chess.dir/saveload.c.obj CMakeFiles/c_chess.dir/gui.c.obj | C$:/msys64/mingw64/lib/libcurl.dll.a
   FLAGS = -g
   LINK_LIBRARIES = C:/msys64/mingw64/lib/libcurl.dll.a  -lgtk-3  -lgdk-3  -lz  -lgdi32  -limm32  -lshell32  -lole32  -luuid  -lwinmm  -ldwmapi  -lsetupapi  -lcfgmgr32  -lhid  -lwinspool  -lcomctl32  -lcomdlg32  -lpangowin32-1.0  -lpangocairo-1.0  -lpango-1.0  -lharfbuzz  -latk-1.0  -lcairo-gobject  -lcairo  -lgdk_pixbuf-2.0  -lgio-2.0  -lgobject-2.0  -lglib-2.0  -lintl  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\c_chess.dir

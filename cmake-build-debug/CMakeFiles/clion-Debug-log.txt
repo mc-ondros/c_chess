@@ -1,8 +1,6 @@
 "C:\Program Files\JetBrains\CLion 2024.2.2\bin\cmake\win\x64\bin\cmake.exe" -DCMAKE_BUILD_TYPE=Debug "-DCMAKE_MAKE_PROGRAM=C:/Program Files/JetBrains/CLion 2024.2.2/bin/ninja/win/x64/ninja.exe" -G Ninja -S C:\Users\mc_ondros\CLionProjects\c_chess -B C:\Users\mc_ondros\CLionProjects\c_chess\cmake-build-debug
 -- Configuring chess project with API support...
 -- Looking for libcurl in custom directory: C:/msys64/mingw64/lib/cmake/CURL
--- Checking for module 'gtk+-3.0'
---   Found gtk+-3.0, version 3.24.49
 -- Found CURL: CURL::libcurl
 -- CURL include dirs: C:/msys64/mingw64/include
 -- Building with API support enabled
