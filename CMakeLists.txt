@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(c_chess C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 
 # Print out more information during cmake configuration
 message(STATUS "Configuring chess project with API support...")
@@ -10,8 +10,8 @@ message(STATUS "Configuring chess project with API support...")
 option(CURL_DIR "Path to libcurl installation directory" "")
 
 # Add common installation paths for libcurl to search path
-list(APPEND CMAKE_PREFIX_PATH 
-    "C:/Program Files/CURL" 
+list(APPEND CMAKE_PREFIX_PATH
+    "C:/Program Files/CURL"
     "C:/curl"
     "C:/vcpkg/installed/x64-windows"
     "C:/vcpkg/installed/x86-windows"
@@ -40,7 +40,7 @@ find_package(CURL QUIET)
 # If not found, try with different configurations
 if(NOT CURL_FOUND)
     message(STATUS "libcurl not found with basic find_package, trying alternative approaches...")
-    
+
     # Try pkg-config approach
     find_package(PkgConfig QUIET)
     if(PKG_CONFIG_FOUND)
@@ -49,11 +49,11 @@ if(NOT CURL_FOUND)
             message(STATUS "Found libcurl using pkg-config")
         endif()
     endif()
-    
+
     # If still not found, try looking for curl.h directly
     if(NOT CURL_FOUND)
         message(STATUS "Searching for curl.h directly...")
-        
+
         # Common include directories to search
         set(CURL_SEARCH_DIRS
             "C:/curl/include"
@@ -64,12 +64,12 @@ if(NOT CURL_FOUND)
             "/usr/include"
             "/usr/local/include"
         )
-        
+
         find_path(CURL_INCLUDE_DIR curl/curl.h PATHS ${CURL_SEARCH_DIRS})
-        
+
         if(CURL_INCLUDE_DIR)
             message(STATUS "Found curl.h at: ${CURL_INCLUDE_DIR}")
-            
+
             # Now try to find the library
             find_library(CURL_LIBRARY
                 NAMES curl libcurl libcurl_imp
@@ -82,7 +82,7 @@ if(NOT CURL_FOUND)
                     "/usr/lib"
                     "/usr/local/lib"
             )
-            
+
             if(CURL_LIBRARY)
                 message(STATUS "Found curl library at: ${CURL_LIBRARY}")
                 set(CURL_FOUND TRUE)
@@ -94,9 +94,9 @@ if(NOT CURL_FOUND)
 endif()
 
 # Include all source files in the project
-add_executable(c_chess 
-    main.c 
-    board.c 
+add_executable(c_chess
+    main.c
+    board.c
     moves.c
     api.c
     check.c
@@ -108,28 +108,28 @@ add_executable(c_chess
 if(CURL_FOUND)
     message(STATUS "Found CURL: ${CURL_LIBRARIES}")
     message(STATUS "CURL include dirs: ${CURL_INCLUDE_DIRS}")
-    
+
     include_directories(${CURL_INCLUDE_DIRS})
     target_link_libraries(c_chess ${CURL_LIBRARIES})
-    
+
     # Add a compile definition to indicate CURL is available
     target_compile_definitions(c_chess PRIVATE CURL_SUPPORT=1)
-    
+
     message(STATUS "Building with API support enabled")
-    
+
     # Copy the DLL to the output directory (on Windows) to ensure it's available at runtime
     if(WIN32)
-        # Try to find the actual DLL file
-        get_filename_component(CURL_LIB_DIR ${CURL_LIBRARY} DIRECTORY)
-        
+        list(GET CURL_LIBRARY 0 CURL_SINGLE_LIBRARY)  # extract the first library path
+        get_filename_component(CURL_LIB_DIR ${CURL_SINGLE_LIBRARY} DIRECTORY)
+
         # Common DLL names to look for
-        set(CURL_DLL_NAMES 
-            "libcurl.dll" 
+        set(CURL_DLL_NAMES
+            "libcurl.dll"
             "curl.dll"
             "libcurl-4.dll"
                 "libcurl-x64.dll"
         )
-        
+
         # Look for the DLL in both the lib directory and its parent
         foreach(DLL_NAME ${CURL_DLL_NAMES})
             if(EXISTS "${CURL_LIB_DIR}/${DLL_NAME}")
@@ -148,7 +148,7 @@ if(CURL_FOUND)
                 break()
             endif()
         endforeach()
-        
+
         # Look for other required DLLs like zlib or SSL
         set(ADDITIONAL_DLLS
             "zlib1.dll"
@@ -157,7 +157,7 @@ if(CURL_FOUND)
             "libeay32.dll"
             "ssleay32.dll"
         )
-        
+
         foreach(DLL_NAME ${ADDITIONAL_DLLS})
             if(EXISTS "${CURL_LIB_DIR}/${DLL_NAME}")
                 message(STATUS "Found additional DLL: ${CURL_LIB_DIR}/${DLL_NAME}")
@@ -182,7 +182,7 @@ else()
     message(STATUS "  - Then use: cmake -DCURL_DIR=C:/path/to/curl ..")
     message(STATUS "For Linux: sudo apt-get install libcurl4-openssl-dev")
     message(STATUS "For macOS: brew install curl")
-    
+
     # Define preprocessor macro to disable API features
     target_compile_definitions(c_chess PRIVATE NO_CURL_SUPPORT)
 endif()
