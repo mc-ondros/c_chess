@@ -1,8 +1,12 @@
-#ifndef GUI_H
-#define GUI_H
+#ifndef C_CHESS_GUI_H
+#define C_CHESS_GUI_H
 
-// Start the GUI
+// GUI function to start the graphical interface
 void startGui(int mode);
 
-#endif // GUI_H
+// External flags for special chess conditions
+extern int checkFlag;
+extern int checkMateFlag;
+extern int stalemateFlag;
 
+#endif //C_CHESS_GUI_H

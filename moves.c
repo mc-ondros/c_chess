@@ -4,6 +4,14 @@
 #include <string.h>
 #include "chess.h"
 
+// Add global flags for GUI notifications of special moves and states
+int enPassantCaptureExecuted = 0;
+int castlingExecuted = 0;
+int promotionExecuted = 0;
+int checkFlag = 0;
+int checkMateFlag = 0;
+int stalemateFlag = 0;
+
 // Helper functions for piece identification
 int isPieceWhite(wchar_t piece) {
     return piece >= white_king && piece <= white_pawn;
@@ -277,6 +285,7 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
               board[toRow + 1][toCol] = 0;
          }
          printf("En passant capture executed!\n");
+         enPassantCaptureExecuted = 1;
     }
 
     // Handle castling: if the king moves two squares horizontally, move the rook accordingly.
@@ -291,6 +300,7 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
               whiteQueenRookMoved = 1;
          }
          whiteKingMoved = 1;
+         castlingExecuted = 1;
     } else if(movedPiece == black_king && abs(fromCol - toCol) == 2 && fromRow == 7) {
          if(toCol == 6) {  // Black kingside castling
               board[7][5] = board[7][7];
@@ -302,13 +312,37 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
               blackQueenRookMoved = 1;
          }
          blackKingMoved = 1;
+         castlingExecuted = 1;
     }
-    // Pawn promotion (unchanged)
+    // Pawn promotion
     if(board[toRow][toCol] == white_pawn && toRow == 7) {
          board[toRow][toCol] = white_queen;  // Automatically promote to queen
          printf("Pawn promoted to Queen!\n");
+         promotionExecuted = 1;
     } else if(board[toRow][toCol] == black_pawn && toRow == 0) {
          board[toRow][toCol] = black_queen;  // Automatically promote to queen
          printf("Pawn promoted to Queen!\n");
+         promotionExecuted = 1;
+    }
+
+    // Get the color of the player who just moved
+    int whiteMove = isPieceWhite(movedPiece);
+    
+    // Clear previous state flags
+    checkFlag = 0;
+    checkMateFlag = 0;
+    stalemateFlag = 0;
+    
+    // Check if opponent's king is in check after this move
+    int opponentIsWhite = !whiteMove;
+    if (isKingInCheck(opponentIsWhite)) {
+        if (isCheckMate(opponentIsWhite)) {
+            checkMateFlag = 1;
+        } else {
+            checkFlag = 1;
+        }
+    } else if (isStaleMate(opponentIsWhite)) {
+        stalemateFlag = 1;
     }
 }
+

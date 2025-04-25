@@ -20,16 +20,54 @@ static int currentPlayer = 0;
 static int gameMode = 2; // Default to two-player mode
 // Label to display whose turn it is
 static GtkWidget *turnLabel;
+// Flag to prevent player from making moves during AI turn
+static int aiThinking = 0;
 
-// --- Function Prototypes (assuming these are in chess.h or defined elsewhere) ---
-// extern wchar_t board[BOARD_SIZE][BOARD_SIZE]; // The game board state
-// extern void createBoard();                     // Initializes the board
-// extern int isValidMove(int fromRow, int fromCol, int toRow, int toCol); // Checks move validity
-// extern void executeMove(int fromRow, int fromCol, int toRow, int toCol); // Makes the move
-// extern void recordMove(int fromRow, int fromCol, int toRow, int toCol); // Records the move (optional)
-// extern int getBlackMove(const char *state, int *fromRow, int *fromCol, int *toRow, int *toCol); // AI move logic
-// extern int rateMoveWithAI(const char *move, const char *state); // Rates a move using AI
-// -----------------------------------------------------------------------------
+// Function to display check message
+static void show_check_message(GtkWindow *parent, int currentPlayerInCheck) {
+    const char *playerColor = currentPlayerInCheck ? "Black" : "White";
+    GtkWidget *dialog = gtk_message_dialog_new(
+        parent,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Check! %s's king is under attack.",
+        playerColor
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "Check");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
+// Function to display checkmate message
+static void show_checkmate_message(GtkWindow *parent) {
+    const char *winner = currentPlayer == 0 ? "Black" : "White";
+    GtkWidget *dialog = gtk_message_dialog_new(
+        parent,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Checkmate! %s wins the game!",
+        winner
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "Checkmate");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
+// Function to display stalemate message
+static void show_stalemate_message(GtkWindow *parent) {
+    GtkWidget *dialog = gtk_message_dialog_new(
+        parent,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Stalemate! The game is a draw."
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "Stalemate");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
 
 // Update the board UI based on the global board array
 static void refresh_board() {
@@ -77,8 +115,61 @@ static void refresh_board() {
         gtk_label_set_text(GTK_LABEL(turnLabel), turnText);
         g_free(turnText); // Free the allocated turn text string
     } else if (gameMode == 1) {
-        gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
+        if (aiThinking) {
+            gtk_label_set_text(GTK_LABEL(turnLabel), "AI is thinking...");
+        } else {
+            gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
+        }
     }
+
+    // Check for special game states and display relevant messages
+    GtkWindow *parent = GTK_WINDOW(gtk_widget_get_toplevel(buttons[0][0]));
+
+    if (checkMateFlag) {
+        // Disable all buttons when game is over
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                gtk_widget_set_sensitive(buttons[r][c], FALSE);
+            }
+        }
+        show_checkmate_message(parent);
+        checkMateFlag = 0; // Reset flag after showing message
+    }
+    else if (stalemateFlag) {
+        // Disable all buttons when game is over
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                gtk_widget_set_sensitive(buttons[r][c], FALSE);
+            }
+        }
+        show_stalemate_message(parent);
+        stalemateFlag = 0; // Reset flag after showing message
+    }
+    else if (checkFlag) {
+        // Current player's king is in check
+        show_check_message(parent, currentPlayer);
+        checkFlag = 0; // Reset flag after showing message
+    }
+}
+
+// Process AI move in a separate function to ensure UI responsiveness
+static gboolean process_ai_move(gpointer data) {
+    int aiFromRow, aiFromCol, aiToRow, aiToCol;
+    int success = getBlackMove(moveHistory, &aiFromRow, &aiFromCol, &aiToRow, &aiToCol);
+    
+    if (success) {
+        executeMove(aiFromRow, aiFromCol, aiToRow, aiToCol);
+    } else {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+                                                 "AI failed to make a move.");
+        gtk_window_set_title(GTK_WINDOW(dialog), "AI Move Error");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+    }
+    
+    aiThinking = 0;
+    refresh_board();
+    return FALSE; // Return FALSE to remove the timeout
 }
 
 // Callback function for when a board square button is clicked
@@ -87,6 +178,16 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
     int *coords = (int *)data;
     int row = coords[0]; // Visual row (0-7, top to bottom)
     int col = coords[1]; // Visual column (0-7, left to right)
+    
+    // Prevent player from making moves during AI's turn
+    if (gameMode == 1 && aiThinking) {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+                                                 "Please wait for the AI to complete its move.");
+        gtk_window_set_title(GTK_WINDOW(dialog), "Please Wait");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+        return;
+    }
 
     // --- First Click: Selecting a piece ---
     if (!selected) {
@@ -136,26 +237,32 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
         }
 
         if (isValidMove(fromRow, fromCol, toRow, toCol)) {
+            // Check if this move would put the moving player's own king in check
+            wchar_t piece = board[fromRow][fromCol];
+            int playerIsWhite = isPieceWhite(piece);
+            
+            if (moveWouldExposeCheck(fromRow, fromCol, toRow, toCol, playerIsWhite)) {
+                GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, 
+                                                         "Invalid move: would leave your king in check.");
+                gtk_window_set_title(GTK_WINDOW(dialog), "Invalid Move");
+                gtk_dialog_run(GTK_DIALOG(dialog));
+                gtk_widget_destroy(dialog);
+                return;
+            }
+            
             executeMove(fromRow, fromCol, toRow, toCol);
+            
             if (gameMode == 2) {
                 currentPlayer = 1 - currentPlayer;
+                refresh_board();
             } else if (gameMode == 1) {
-                // One-player mode: update turn label and call AI move with moveHistory
-                gtk_label_set_text(GTK_LABEL(turnLabel), "AI is thinking...");
-                int aiFromRow, aiFromCol, aiToRow, aiToCol;
-                int success = getBlackMove(moveHistory, &aiFromRow, &aiFromCol, &aiToRow, &aiToCol);
-                if (success) {
-                    executeMove(aiFromRow, aiFromCol, aiToRow, aiToCol);
-                } else {
-                    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
-                                                             "AI failed to make a move.");
-                    gtk_window_set_title(GTK_WINDOW(dialog), "AI Move Error");
-                    gtk_dialog_run(GTK_DIALOG(dialog));
-                    gtk_widget_destroy(dialog);
-                }
-                gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
+                // One-player mode: update turn label and call AI move after a short delay
+                aiThinking = 1;
+                refresh_board();
+                
+                // Use a timeout to allow the UI to update before processing the AI move
+                g_timeout_add(500, process_ai_move, NULL);
             }
-            refresh_board();
         } else {
             GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Invalid move.");
             gtk_window_set_title(GTK_WINDOW(dialog), "Invalid Move");
@@ -331,7 +438,9 @@ void startGui(int mode) {
     gtk_init(NULL, NULL);
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    // Set window title and icon
     gtk_window_set_title(GTK_WINDOW(window), "C Chess");
+    gtk_window_set_icon_from_file(GTK_WINDOW(window), "chess_icon.png", NULL);
     gtk_container_set_border_width(GTK_CONTAINER(window), 10);
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
@@ -373,3 +482,4 @@ void startGui(int mode) {
     gtk_widget_show_all(window);
     gtk_main();
 }
+

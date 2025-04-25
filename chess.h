@@ -28,7 +28,7 @@ extern int whiteKingMoved, whiteKingRookMoved, whiteQueenRookMoved;
 extern int blackKingMoved, blackKingRookMoved, blackQueenRookMoved;
 extern int enPassantTargetRow, enPassantTargetCol;
 
-// Functions
+// Board manipulation and movement functions
 void createBoard();
 void printBoard();
 int readMove(int *fromRow, int *fromCol, int *toRow, int *toCol);
@@ -45,8 +45,14 @@ int isPieceWhite(wchar_t piece);
 int isPieceBlack(wchar_t piece);
 void recordMove(int fromRow, int fromCol, int toRow, int toCol);
 void printMoveHistory();
+
+// Check-related functions (defined in check.c)
+int findKing(int playerIsWhite, int *kingRow, int *kingCol);
 int isKingInCheck(int playerIsWhite);
+int moveWouldExposeCheck(int fromRow, int fromCol, int toRow, int toCol, int playerIsWhite);
+int hasLegalMoves(int playerIsWhite);
 int isCheckMate(int playerIsWhite);
+int isStaleMate(int playerIsWhite);
 
 // Save/Load functions
 int saveGame(const char* filename);
