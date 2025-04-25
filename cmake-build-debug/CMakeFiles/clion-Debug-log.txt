@@ -8,6 +8,6 @@
 --   API support: TRUE
 --   C Standard: 11
 --   Build type: Debug
--- Configuring done (0.7s)
+-- Configuring done (0.3s)
 -- Generating done (0.0s)
 -- Build files have been written to: C:/Users/mc_ondros/CLionProjects/c_chess/cmake-build-debug

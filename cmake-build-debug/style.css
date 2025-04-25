@@ -1,0 +1,39 @@
+/* General style for all board buttons */
+button.board-button {
+    border-radius: 0 !important;
+    border: none !important;
+    font-size: 30px;
+    padding: 0;
+    margin: 0;
+    /* Ensure theme doesn't add shadows or other effects */
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+/* Style for white squares */
+.white-square {
+    background-image: none !important;
+    background-color: #ffffff !important;
+}
+
+/* Style for black squares */
+.black-square {
+    background-image: none !important;
+    background-color: #000000 !important;
+}
+
+/* Style for white pieces (black color for contrast) */
+.white-piece {
+    color: #000000 !important;
+}
+
+/* Style for black pieces (white color for contrast) */
+.black-piece {
+    color: #ffffff !important;
+}
+
+/* Style for the selected square highlight */
+.selected-square {
+    background-image: none !important;
+    background-color: #6495ED !important; /* Cornflower Blue */
+}
