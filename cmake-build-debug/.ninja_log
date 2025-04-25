@@ -1,9 +1,17 @@
 # ninja log v6
-8	126	7653716248980679	CMakeFiles/c_chess.dir/main.c.obj	32220077f74436a0
-127	343	7653716250177519	c_chess.exe	7ba28b2b885000d0
-16	164	7653709924308500	CMakeFiles/c_chess.dir/board.c.obj	7025d7b3d3f25d4d
-4	423	7672727427784078	build.ninja	d1354956c2ad45f5
-30	179	7653709924447963	CMakeFiles/c_chess.dir/check.c.obj	2bb85d050bf343df
-25	1428	7653709924398092	CMakeFiles/c_chess.dir/api.c.obj	a2c0aa466c2f60
-8	1196	7653712114697945	CMakeFiles/c_chess.dir/moves.c.obj	3d20f221bdc9f345
-35	200	7653709924487855	CMakeFiles/c_chess.dir/saveload.c.obj	52ac78d61af6d584
+10	178	7672727937577558	CMakeFiles/c_chess.dir/main.c.obj	ef52f1f42bb20f2f
+1327	1461	7672727950744338	c_chess.exe	63ba8289a53a125f
+16	171	7672727937633148	CMakeFiles/c_chess.dir/board.c.obj	6eb0f639ef69207c
+4	423	7672739609505648	build.ninja	d1354956c2ad45f5
+32	160	7672727937799447	CMakeFiles/c_chess.dir/check.c.obj	d0fa8299305b4237
+27	1325	7672727937749546	CMakeFiles/c_chess.dir/api.c.obj	130052871b37c569
+22	193	7672727937693527	CMakeFiles/c_chess.dir/moves.c.obj	8994a6b14ed84f00
+37	186	7672727937844718	CMakeFiles/c_chess.dir/saveload.c.obj	79f3568467280d3
+33	208	7672739719621661	CMakeFiles/c_chess.dir/check.c.obj	ebbadff3d556afd7
+38	231	7672739719661543	CMakeFiles/c_chess.dir/saveload.c.obj	faac5544086dc88c
+23	257	7672739719511940	CMakeFiles/c_chess.dir/moves.c.obj	90c2f1cef529753e
+18	518	7672739719472085	CMakeFiles/c_chess.dir/board.c.obj	69f461db0e53f46
+27	1454	7672739719561808	CMakeFiles/c_chess.dir/api.c.obj	3cb848e5138de5bc
+10	140	7672739898559035	CMakeFiles/c_chess.dir/main.c.obj	215640e9c05b903e
+141	594	7672739899875520	c_chess.exe	ed2d761c3682e572
+9	133	7672740290857012	CMakeFiles/c_chess.dir/main.c.obj	215640e9c05b903e
