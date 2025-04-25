@@ -21,6 +21,31 @@ int isPieceBlack(wchar_t piece) {
     return piece >= black_king && piece <= black_pawn;
 }
 
+// New helper: check if a square is attacked by opponent pieces.
+// defenderIsWhite indicates the color of the king that would occupy the square.
+static int isSquareAttacked(int row, int col, int defenderIsWhite) {
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            wchar_t piece = board[i][j];
+            if (piece == 0) continue;
+            // Only consider opponent pieces.
+            if (defenderIsWhite && isPieceBlack(piece)) {
+                // Use isValidMove but skip castling (assume king moves only one square).
+                if ( (abs(i - row) <= 1 && abs(j - col) <= 1 && piece == black_king) ||
+                     (piece != black_king && isValidMove(i, j, row, col)) ) {
+                    return 1;
+                }
+            } else if (!defenderIsWhite && isPieceWhite(piece)) {
+                if ( (abs(i - row) <= 1 && abs(j - col) <= 1 && piece == white_king) ||
+                     (piece != white_king && isValidMove(i, j, row, col)) ) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 // Function to record a move in chess notation
 void recordMove(int fromRow, int fromCol, int toRow, int toCol) {
     char moveStr[16];
@@ -123,7 +148,7 @@ int isPathClear(int fromRow, int fromCol, int toRow, int toCol) {
     return 1; // Path is clear
 }
 
-// Check pawn move validity
+// Modified pawn move validity function to support en passant capture
 int isPawnMove(wchar_t piece, int fromRow, int fromCol, int toRow, int toCol) {
     int direction = (piece == white_pawn) ? 1 : -1;
     int startRow = (piece == white_pawn) ? 1 : 6;
@@ -139,11 +164,17 @@ int isPawnMove(wchar_t piece, int fromRow, int fromCol, int toRow, int toCol) {
         return 1;
     }
 
-    // Capture move
+    // Capture move (including en passant)
     if (abs(fromCol - toCol) == 1 && toRow == fromRow + direction) {
         wchar_t targetPiece = board[toRow][toCol];
+        // Normal capture
         if ((piece == white_pawn && isPieceBlack(targetPiece)) ||
             (piece == black_pawn && isPieceWhite(targetPiece))) {
+            return 1;
+        }
+        // En passant capture: if target square is empty and matches enPassant target
+        if (targetPiece == 0 &&
+            toRow == enPassantTargetRow && toCol == enPassantTargetCol) {
             return 1;
         }
     }
@@ -194,22 +225,39 @@ int isKingMove(wchar_t piece, int fromRow, int fromCol, int toRow, int toCol) {
     // Normal one-square king move
     if(rowDiff <= 1 && colDiff <= 1)
         return 1;
+    
     // Castling move (king moves two squares horizontally on its starting row)
     if(rowDiff == 0 && colDiff == 2) {
          if(piece == white_king && fromRow == 0) {
               if(toCol == 6 && !whiteKingMoved && !whiteKingRookMoved &&
-                 board[0][5] == 0 && board[0][6] == 0 && board[0][7] == white_rook)
-                 return 1;
+                 board[0][5] == 0 && board[0][6] == 0 && board[0][7] == white_rook) {
+                     // For kingside, ensure squares f1 and g1 are not attacked.
+                     if(isSquareAttacked(0, 5, 1) || isSquareAttacked(0, 6, 1))
+                         return 0;
+                     return 1;
+              }
               else if(toCol == 2 && !whiteKingMoved && !whiteQueenRookMoved &&
-                      board[0][3] == 0 && board[0][2] == 0 && board[0][1] == 0 && board[0][0] == white_rook)
-                 return 1;
+                      board[0][3] == 0 && board[0][2] == 0 && board[0][1] == 0 && board[0][0] == white_rook) {
+                     // For queenside, ensure squares d1 and c1 are not attacked.
+                     if(isSquareAttacked(0, 3, 1) || isSquareAttacked(0, 2, 1))
+                         return 0;
+                     return 1;
+              }
          } else if(piece == black_king && fromRow == 7) {
               if(toCol == 6 && !blackKingMoved && !blackKingRookMoved &&
-                 board[7][5] == 0 && board[7][6] == 0 && board[7][7] == black_rook)
-                 return 1;
+                 board[7][5] == 0 && board[7][6] == 0 && board[7][7] == black_rook) {
+                     // For kingside, ensure squares f8 and g8 are not attacked.
+                     if(isSquareAttacked(7, 5, 0) || isSquareAttacked(7, 6, 0))
+                         return 0;
+                     return 1;
+              }
               else if(toCol == 2 && !blackKingMoved && !blackQueenRookMoved &&
-                      board[7][3] == 0 && board[7][2] == 0 && board[7][1] == 0 && board[7][0] == black_rook)
-                 return 1;
+                      board[7][3] == 0 && board[7][2] == 0 && board[7][1] == 0 && board[7][0] == black_rook) {
+                     // For queenside, ensure squares d8 and c8 are not attacked.
+                     if(isSquareAttacked(7, 3, 0) || isSquareAttacked(7, 2, 0))
+                         return 0;
+                     return 1;
+              }
          }
     }
     return 0;
