@@ -1,39 +1,62 @@
-/* General style for all board buttons */
+/* Global default font */
+* {
+    font-family: "Open Sans", sans-serif;
+}
+
+/* Updated styling for all board buttons */
 button.board-button {
-    border-radius: 0;
-    border-width: 0;
+    border-radius: 5px;   /* Increased border radius for a softer look */
+    border-width: 1px;
     font-size: 30px;
     padding: 0;
     margin: 0;
-    /* Ensure theme doesn't add shadows or other effects */
-    box-shadow: none;
-    text-shadow: none;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-/* Style for white squares */
+/* Updated style for white squares with gradient */
 .white-square {
-    background-image: none ;
-    background-color: #D2D0D1;
+    background-image: linear-gradient(145deg, #e2e1e3, #D2D2D2);
 }
 
-/* Style for black squares */
+/* Updated style for black squares with gradient */
 .black-square {
-    background-image: none ;
-    background-color: #494B4A ;
+    background-image: linear-gradient(145deg, #5a5a5a, #414141);
 }
 
-/* Style for white pieces (black color for contrast) */
+/* Maintain styling for pieces */
 .white-piece {
-    color: #ffffff ;
+    color: #ffffff;
 }
-
-/* Style for black pieces (white color for contrast) */
 .black-piece {
-    color: #000000 ;
+    color: #000000;
 }
 
-/* Style for the selected square highlight */
+/* Enhanced selected square highlight */
 .selected-square {
-    background-image: none ;
-    background-color: #6495ED ; /* Cornflower Blue */
+    background-color: #6495ED;
+    border: 2px solid #FFD700;  /* Golden border for emphasis */
+}
+
+/* New styling for toolbar */
+.toolbar {
+    background-color: #333333;
+    padding: 5px;
+}
+.toolbar .tool-button {
+    color: #ffffff;
+    background: none;
+    border: none;
+    transition: background-color 0.3s;
+    font-weight: bold;  /* Ensure tool buttons are bold */
+}
+.toolbar .tool-button:hover {
+    background-color: #555555;
+}
+
+/* New styling for turn label */
+#turnLabel {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
 }

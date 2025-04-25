@@ -4,6 +4,7 @@
 #include "chess.h" // Assuming chess.h contains board definition and move logic
 #include "gui.h"   // Assuming gui.h contains function prototypes for gui
 #include "api.h"   // Added to support one-player AI move
+#include "saveload.h"  // Added for saveGame and loadGame functions
 
 #define BOARD_SIZE 8
 
@@ -194,6 +195,62 @@ static void on_rate_move_clicked(GtkWidget *widget, gpointer data) {
     gtk_widget_destroy(resultDialog);
 }
 
+// New callback for saving the game.
+static void on_save_game_clicked(GtkWidget *widget, gpointer data) {
+    GtkWidget *dialog = gtk_file_chooser_dialog_new("Save Game", GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                    GTK_FILE_CHOOSER_ACTION_SAVE,
+                                    "_Cancel", GTK_RESPONSE_CANCEL,
+                                    "_Save", GTK_RESPONSE_ACCEPT,
+                                    NULL);
+    gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        if (saveGame(filename)) {
+            GtkWidget *msg = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                     GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
+                                                     "Game saved successfully to %s", filename);
+            gtk_dialog_run(GTK_DIALOG(msg));
+            gtk_widget_destroy(msg);
+        } else {
+            GtkWidget *msg = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                     GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+                                                     "Error saving game to %s", filename);
+            gtk_dialog_run(GTK_DIALOG(msg));
+            gtk_widget_destroy(msg);
+        }
+        g_free(filename);
+    }
+    gtk_widget_destroy(dialog);
+}
+
+// New callback for loading the game.
+static void on_load_game_clicked(GtkWidget *widget, gpointer data) {
+    GtkWidget *dialog = gtk_file_chooser_dialog_new("Load Game", GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                    GTK_FILE_CHOOSER_ACTION_OPEN,
+                                    "_Cancel", GTK_RESPONSE_CANCEL,
+                                    "_Open", GTK_RESPONSE_ACCEPT,
+                                    NULL);
+    if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+        char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+        if (loadGame(filename)) {
+            refresh_board();
+            GtkWidget *msg = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                     GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_OK,
+                                                     "Game loaded successfully from %s", filename);
+            gtk_dialog_run(GTK_DIALOG(msg));
+            gtk_widget_destroy(msg);
+        } else {
+            GtkWidget *msg = gtk_message_dialog_new(GTK_WINDOW(gtk_widget_get_toplevel(widget)),
+                                                     GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+                                                     "Error loading game from %s", filename);
+            gtk_dialog_run(GTK_DIALOG(msg));
+            gtk_widget_destroy(msg);
+        }
+        g_free(filename);
+    }
+    gtk_widget_destroy(dialog);
+}
+
 // Creates and returns the GTK Grid widget containing the chess board buttons and labels
 GtkWidget* create_board_grid() {
     GtkWidget *grid = gtk_grid_new();
@@ -288,10 +345,27 @@ void startGui(int mode) {
     GtkWidget *grid = create_board_grid();
     gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 0);
 
-    // New "Rate Last Move" button added below the board
-    GtkWidget *rateButton = gtk_button_new_with_label("Rate Last Move With Gemini");
-    g_signal_connect(rateButton, "clicked", G_CALLBACK(on_rate_move_clicked), NULL);
-    gtk_box_pack_start(GTK_BOX(vbox), rateButton, FALSE, FALSE, 5);
+    // Create a toolbar for Save, Load, and Rate Move buttons
+    GtkWidget *toolBar = gtk_toolbar_new();
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(toolBar), GTK_ORIENTATION_HORIZONTAL);
+
+    // Add Save Game tool button
+    GtkToolItem *saveToolItem = gtk_tool_button_new(NULL, "Save Game");
+    g_signal_connect(saveToolItem, "clicked", G_CALLBACK(on_save_game_clicked), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(toolBar), saveToolItem, -1);
+
+    // Add Load Game tool button
+    GtkToolItem *loadToolItem = gtk_tool_button_new(NULL, "Load Game");
+    g_signal_connect(loadToolItem, "clicked", G_CALLBACK(on_load_game_clicked), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(toolBar), loadToolItem, -1);
+
+    // Add Rate Last Move tool button
+    GtkToolItem *rateToolItem = gtk_tool_button_new(NULL, "Rate Last Move With Gemini");
+    g_signal_connect(rateToolItem, "clicked", G_CALLBACK(on_rate_move_clicked), NULL);
+    gtk_toolbar_insert(GTK_TOOLBAR(toolBar), rateToolItem, -1);
+
+    // Pack the toolbar into the vbox
+    gtk_box_pack_start(GTK_BOX(vbox), toolBar, FALSE, FALSE, 5);
 
     createBoard();
     refresh_board();
@@ -299,5 +373,3 @@ void startGui(int mode) {
     gtk_widget_show_all(window);
     gtk_main();
 }
-
-
