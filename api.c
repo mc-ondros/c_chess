@@ -19,45 +19,46 @@ struct ResponseData {
 static char ai_personality[512] = ""; // Store AI personality
 
 // Add this function to set the personality
-void setAiPersonality(const char* personality) {
+void setAiPersonality(const char *personality) {
     strncpy(ai_personality, personality, sizeof(ai_personality) - 1);
     ai_personality[sizeof(ai_personality) - 1] = '\0';
 }
+
 // Set the API key
-void setApiKey(const char* key) {
+void setApiKey(const char *key) {
     strncpy(api_key, key, sizeof(api_key) - 1);
     api_key[sizeof(api_key) - 1] = '\0';
 }
 
-char* find_pattern(const char *text) {
+char *find_pattern(const char *text) {
     while (*text && *(text + 1) && *(text + 2) && *(text + 3)) {
         if (isalpha(text[0]) && isdigit(text[1]) && isalpha(text[2]) && isdigit(text[3])) {
             // Allocate memory for the result (4 characters + null terminator)
-            char *result = (char *)malloc(5 * sizeof(char));
+            char *result = (char *) malloc(5 * sizeof(char));
             if (!result) {
-                return NULL;  // Memory allocation failed
+                return NULL; // Memory allocation failed
             }
             result[0] = text[0];
             result[1] = text[1];
             result[2] = text[2];
             result[3] = text[3];
-            result[4] = '\0';  // Null-terminate the string
+            result[4] = '\0'; // Null-terminate the string
             return result;
         }
-        text++;  // Move to the next character
+        text++; // Move to the next character
     }
-    return NULL;  // No match found
+    return NULL; // No match found
 }
 
 // Get the API key
-const char* getApiKey() {
+const char *getApiKey() {
     return api_key;
 }
 
 // Callback function for handling the API response
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
     size_t realsize = size * nmemb;
-    struct ResponseData *mem = (struct ResponseData *)userp;
+    struct ResponseData *mem = (struct ResponseData *) userp;
 
     char *ptr = realloc(mem->data, mem->size + realsize + 1);
     if (!ptr) {
@@ -95,7 +96,7 @@ int extractRating(const char *str) {
             char *end_ptr;
             long value = strtol(p, &end_ptr, 10);
             if (value >= 0 && value <= 10) {
-                return (int)value;
+                return (int) value;
             }
             // Move pointer past this number and continue searching.
             p = end_ptr;
@@ -106,7 +107,7 @@ int extractRating(const char *str) {
     return -1; // No valid rating found
 }
 
-int rateMoveWithAI(const char *move,const char *moveHistory) {
+int rateMoveWithAI(const char *move, const char *moveHistory) {
     int rating = 0;
     CURL *curl;
     CURLcode res;
@@ -124,9 +125,9 @@ int rateMoveWithAI(const char *move,const char *moveHistory) {
         free(response.data);
         return 0;
     }
-    snprintf(prompt, sizeof(prompt)+256,
-        "Considering this move history: %s Rate the following chess move: %s. Provide a score from 0 to 10, where 0 is a bad move and 10 is an excellent move. Don't use any formatting, just plaintext.",
-        moveHistory,move);
+    snprintf(prompt, 1024,
+             "Considering this move history: %s Rate the following chess move: %s. Provide a score from 0 to 10, where 0 is a bad move and 10 is an excellent move. Don't use any formatting, just plaintext.",
+             moveHistory, move);
     char *payload = malloc(strlen(prompt) + 256);
     if (!payload) {
         printf("Error: Memory allocation failed!\n");
@@ -139,7 +140,8 @@ int rateMoveWithAI(const char *move,const char *moveHistory) {
 
     // Create the URL with the API key
     char url[512];
-    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", api_key);
+    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s",
+            api_key);
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
@@ -218,7 +220,7 @@ void displayMoveRating(int fromRow, int fromCol, int toRow, int toCol) {
 }
 
 // Function to call the Gemini API and get black's move
-int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow, int* toCol) {
+int getBlackMove(const char *moveHistory, int *fromRow, int *fromCol, int *toRow, int *toCol) {
     CURL *curl;
     CURLcode res;
 
@@ -235,19 +237,19 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
     // Prepare the prompt for Gemini API
     char base_prompt[1024];
     snprintf(base_prompt, sizeof(base_prompt),
-        "Let's play a game of chess. I will play as white. "
-        "You will play as black with the following personality: %s. "
-        "After each of my moves, you will: "
-        "I will tell you only legal moves. "
-        "Then, you will make your move as black, telling me the piece position "
-        "and move position (e.g. e2e4). "
-        "Every response you give must be composed of exactly 4 letters, representing your move."
-        "Validate your move according to standard chess rules. If your move is wrong, think again. "
-        "Maintain the game state throughout our interaction. "
-        "Inform me if a checkmate, stalemate, or draw occurs, and explain the outcome. "
-        "Please do not provide any commentary or analysis beyond the requested information, "
-        "unless I ask for it. Respond only with the move.",
-        ai_personality[0] ? ai_personality : "a skilled chess player");
+             "Let's play a game of chess. I will play as white. "
+             "You will play as black with the following personality: %s. "
+             "After each of my moves, you will: "
+             "I will tell you only legal moves. "
+             "Then, you will make your move as black, telling me the piece position "
+             "and move position (e.g. e2e4). "
+             "Every response you give must be composed of exactly 4 letters, representing your move."
+             "Validate your move according to standard chess rules. If your move is wrong, think again. "
+             "Maintain the game state throughout our interaction. "
+             "Inform me if a checkmate, stalemate, or draw occurs, and explain the outcome. "
+             "Please do not provide any commentary or analysis beyond the requested information, "
+             "unless I ask for it. Respond only with the move.",
+             ai_personality[0] ? ai_personality : "a skilled chess player");
 
     // Create the complete prompt with the move history
     char *prompt = malloc(strlen(base_prompt) + strlen(moveHistory) + 100);
@@ -272,7 +274,8 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
 
     // Create the URL with the API key
     char url[512];
-    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", api_key);
+    sprintf(url, "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s",
+            api_key);
 
     // Initialize libcurl
     curl_global_init(CURL_GLOBAL_ALL);
@@ -305,7 +308,15 @@ int getBlackMove(const char* moveHistory, int* fromRow, int* fromCol, int* toRow
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         } else {
             // Extract the black's move from the response
-            success = extractMove(find_pattern(response.data), fromRow, fromCol, toRow, toCol);
+            char *pattern = find_pattern(response.data);
+            if (pattern != NULL) {
+                success = extractMove(pattern, fromRow, fromCol, toRow, toCol);
+                free(pattern); // Don't forget to free the allocated memory
+            } else {
+                printf("Error: Could not extract move from API response\n");
+                printf("Response: %s\n", response.data);
+                success = 0;
+            }
             if (!success) {
                 printf("Error: Failed to extract move from API response\n");
                 printf("API response: %s\n", find_pattern(response.data));

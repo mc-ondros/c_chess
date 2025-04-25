@@ -251,7 +251,7 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
     // Store the piece being moved and the original destination
     wchar_t movedPiece = board[fromRow][fromCol];
     wchar_t targetPiece = board[toRow][toCol];
-    
+
     // For pawns: set en passant target if moving two squares, else reset targets
     if((movedPiece == white_pawn && (toRow - fromRow) == 2) ||
        (movedPiece == black_pawn && (fromRow - toRow) == 2)) {
@@ -261,11 +261,11 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
          enPassantTargetRow = -1;
          enPassantTargetCol = -1;
     }
-    
+
     // Execute the move
     board[toRow][toCol] = movedPiece;
     board[fromRow][fromCol] = 0;
-    
+
     // Handle en passant capture:
     // If a pawn moves diagonally into an empty square (i.e. targetPiece was 0),
     // capture the opponent's pawn located just behind the destination.
@@ -278,7 +278,7 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
          }
          printf("En passant capture executed!\n");
     }
-    
+
     // Handle castling: if the king moves two squares horizontally, move the rook accordingly.
     if(movedPiece == white_king && abs(fromCol - toCol) == 2 && fromRow == 0) {
          if(toCol == 6) {  // White kingside castling
@@ -303,10 +303,6 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
          }
          blackKingMoved = 1;
     }
-    
-    // Update king/rook moved flags for normal king or rook moves (if needed)
-    // ...existing code...
-    
     // Pawn promotion (unchanged)
     if(board[toRow][toCol] == white_pawn && toRow == 7) {
          board[toRow][toCol] = white_queen;  // Automatically promote to queen

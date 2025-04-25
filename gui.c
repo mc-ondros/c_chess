@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "chess.h" // Assuming chess.h contains board definition and move logic
 #include "gui.h"   // Assuming gui.h contains function prototypes for gui
+#include "api.h"   // Added to support one-player AI move
 
 #define BOARD_SIZE 8
 
@@ -25,6 +26,8 @@ static GtkWidget *turnLabel;
 // extern int isValidMove(int fromRow, int fromCol, int toRow, int toCol); // Checks move validity
 // extern void executeMove(int fromRow, int fromCol, int toRow, int toCol); // Makes the move
 // extern void recordMove(int fromRow, int fromCol, int toRow, int toCol); // Records the move (optional)
+// extern int getBlackMove(const char *state, int *fromRow, int *fromCol, int *toRow, int *toCol); // AI move logic
+// extern int rateMoveWithAI(const char *move, const char *state); // Rates a move using AI
 // -----------------------------------------------------------------------------
 
 // Update the board UI based on the global board array
@@ -67,11 +70,13 @@ static void refresh_board() {
         }
     }
 
-    // Update the turn label (only relevant in two-player mode)
+    // Update the turn label for game mode
     if (gameMode == 2) {
         gchar *turnText = g_strdup_printf("Current turn: %s", currentPlayer == 0 ? "White" : "Black");
         gtk_label_set_text(GTK_LABEL(turnLabel), turnText);
         g_free(turnText); // Free the allocated turn text string
+    } else if (gameMode == 1) {
+        gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
     }
 }
 
@@ -92,6 +97,16 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
                     GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
                                                              "It's %s's turn!", currentPlayer == 0 ? "White" : "Black");
                     gtk_window_set_title(GTK_WINDOW(dialog), "Wrong Turn");
+                    gtk_dialog_run(GTK_DIALOG(dialog));
+                    gtk_widget_destroy(dialog);
+                    return;
+                }
+            } else { // One-Player mode: ensure only white pieces are selected
+                int isPieceWhite = (piece >= 0x2654 && piece <= 0x2659);
+                if (!isPieceWhite) {
+                    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_OK,
+                                                             "In one-player mode, you can only move white pieces.");
+                    gtk_window_set_title(GTK_WINDOW(dialog), "Invalid Selection");
                     gtk_dialog_run(GTK_DIALOG(dialog));
                     gtk_widget_destroy(dialog);
                     return;
@@ -121,9 +136,23 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
 
         if (isValidMove(fromRow, fromCol, toRow, toCol)) {
             executeMove(fromRow, fromCol, toRow, toCol);
-            recordMove(fromRow, fromCol, toRow, toCol);
             if (gameMode == 2) {
                 currentPlayer = 1 - currentPlayer;
+            } else if (gameMode == 1) {
+                // One-player mode: update turn label and call AI move with moveHistory
+                gtk_label_set_text(GTK_LABEL(turnLabel), "AI is thinking...");
+                int aiFromRow, aiFromCol, aiToRow, aiToCol;
+                int success = getBlackMove(moveHistory, &aiFromRow, &aiFromCol, &aiToRow, &aiToCol);
+                if (success) {
+                    executeMove(aiFromRow, aiFromCol, aiToRow, aiToCol);
+                } else {
+                    GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK,
+                                                             "AI failed to make a move.");
+                    gtk_window_set_title(GTK_WINDOW(dialog), "AI Move Error");
+                    gtk_dialog_run(GTK_DIALOG(dialog));
+                    gtk_widget_destroy(dialog);
+                }
+                gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
             }
             refresh_board();
         } else {
@@ -133,6 +162,36 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
             gtk_widget_destroy(dialog);
         }
     }
+}
+
+// Modified callback: parses the last move from moveHistory, calls rateMoveWithAI, and displays the rating result.
+static void on_rate_move_clicked(GtkWidget *widget, gpointer data) {
+    // Create a local copy to avoid modifying global moveHistory
+    char copyHistory[4096];
+    strcpy(copyHistory, moveHistory);
+    char *token = NULL, *lastToken = NULL;
+    token = strtok(copyHistory, " ");
+    while(token) {
+        lastToken = token;
+        token = strtok(NULL, " ");
+    }
+    if (!lastToken) {
+        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                    GTK_BUTTONS_OK, "No move to rate.");
+        gtk_window_set_title(GTK_WINDOW(dialog), "Rate Move");
+        gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_destroy(dialog);
+        return;
+    }
+    // Call API functionality to rate the move
+    int rating = rateMoveWithAI(lastToken, moveHistory);
+    char message[256];
+    sprintf(message, "Rating for move %s: %d", lastToken, rating);
+    GtkWidget *resultDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                     GTK_BUTTONS_OK, "%s", message);
+    gtk_window_set_title(GTK_WINDOW(resultDialog), "Move Rating");
+    gtk_dialog_run(GTK_DIALOG(resultDialog));
+    gtk_widget_destroy(resultDialog);
 }
 
 // Creates and returns the GTK Grid widget containing the chess board buttons and labels
@@ -229,6 +288,11 @@ void startGui(int mode) {
     GtkWidget *grid = create_board_grid();
     gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 0);
 
+    // New "Rate Last Move" button added below the board
+    GtkWidget *rateButton = gtk_button_new_with_label("Rate Last Move With Gemini");
+    g_signal_connect(rateButton, "clicked", G_CALLBACK(on_rate_move_clicked), NULL);
+    gtk_box_pack_start(GTK_BOX(vbox), rateButton, FALSE, FALSE, 5);
+
     createBoard();
     refresh_board();
 
@@ -236,9 +300,4 @@ void startGui(int mode) {
     gtk_main();
 }
 
-/*
-int main(int argc, char *argv[]) {
-    startGui(2);
-    return 0;
-}
-*/
+

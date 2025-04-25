@@ -17,7 +17,7 @@ int main(void) {
     _setmode(_fileno(stdout), _O_U16TEXT); // Enable Unicode output in Windows
 
     // Set the API key - replace this with your actual API key
-    // setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
+    setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
 
     // Game mode selection: prompt remains for setting personality in one-player mode.
     int gameMode = 0;

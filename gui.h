@@ -1,7 +1,8 @@
 #ifndef GUI_H
 #define GUI_H
 
-// Start the GUI with the selected game mode
-void startGui(int gameMode);
+// Start the GUI
+void startGui(int mode);
 
 #endif // GUI_H
+
