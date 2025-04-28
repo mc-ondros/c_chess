@@ -20,6 +20,52 @@ int fiftyMoveCounter = 0;
 unsigned long long positionHashes[MAX_REPETITIONS];
 int repetitionCount = 0;
 
+// --- Bitboard representation for speed optimization ---
+Bitboard bitboards[12] = {0}; // 0-5: white, 6-11: black (K,Q,R,B,N,P)
+
+static int pieceToBitboardIndex(wchar_t piece) {
+    switch (piece) {
+        case white_king:   return 0;
+        case white_queen:  return 1;
+        case white_rook:   return 2;
+        case white_bishop: return 3;
+        case white_knight: return 4;
+        case white_pawn:   return 5;
+        case black_king:   return 6;
+        case black_queen:  return 7;
+        case black_rook:   return 8;
+        case black_bishop: return 9;
+        case black_knight: return 10;
+        case black_pawn:   return 11;
+        default: return -1;
+    }
+}
+
+void initBitboards() {
+    memset(bitboards, 0, sizeof(bitboards));
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            wchar_t piece = board[row][col];
+            int idx = pieceToBitboardIndex(piece);
+            if (idx >= 0) {
+                bitboards[idx] |= (1ULL << (row * 8 + col));
+            }
+        }
+    }
+}
+
+void updateBitboards() {
+    initBitboards();
+}
+
+int isSquareOccupied(int row, int col) {
+    for (int i = 0; i < 12; ++i) {
+        if (bitboards[i] & (1ULL << (row * 8 + col)))
+            return 1;
+    }
+    return 0;
+}
+
 // Helper functions for piece identification
 int isPieceWhite(wchar_t piece) {
     return piece >= white_king && piece <= white_pawn;
@@ -52,6 +98,35 @@ static int isSquareAttacked(int row, int col, int defenderIsWhite) {
         }
     }
     return 0;
+}
+
+// Fast attack check using bitboards for knights and pawns (partial optimization)
+int isSquareAttackedBB(int row, int col, int defenderIsWhite) {
+    // Knight moves
+    static const int knightMoves[8][2] = {
+        {2,1},{1,2},{-1,2},{-2,1},{-2,-1},{-1,-2},{1,-2},{2,-1}
+    };
+    int attackerIdx = defenderIsWhite ? 10 : 4; // black_knight or white_knight
+    for (int i = 0; i < 8; ++i) {
+        int r = row + knightMoves[i][0];
+        int c = col + knightMoves[i][1];
+        if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+            if (bitboards[attackerIdx] & (1ULL << (r * 8 + c)))
+                return 1;
+        }
+    }
+    // Pawn attacks
+    if (defenderIsWhite) {
+        // black pawn attacks down
+        if (row > 0 && col > 0 && (bitboards[11] & (1ULL << ((row-1)*8 + (col-1))))) return 1;
+        if (row > 0 && col < 7 && (bitboards[11] & (1ULL << ((row-1)*8 + (col+1))))) return 1;
+    } else {
+        // white pawn attacks up
+        if (row < 7 && col > 0 && (bitboards[5] & (1ULL << ((row+1)*8 + (col-1))))) return 1;
+        if (row < 7 && col < 7 && (bitboards[5] & (1ULL << ((row+1)*8 + (col+1))))) return 1;
+    }
+    // For other pieces, fallback to slow path (could be optimized further)
+    return isSquareAttacked(row, col, defenderIsWhite);
 }
 
 // Function to check for 50-move rule draw
@@ -277,14 +352,14 @@ int isKingMove(wchar_t piece, int fromRow, int fromCol, int toRow, int toCol) {
               if(toCol == 6 && !whiteKingMoved && !whiteKingRookMoved &&
                  board[0][5] == 0 && board[0][6] == 0 && board[0][7] == white_rook) {
                      // For kingside, ensure squares f1 and g1 are not attacked.
-                     if(isSquareAttacked(0, 5, 1) || isSquareAttacked(0, 6, 1))
+                     if(isSquareAttackedBB(0, 5, 1) || isSquareAttackedBB(0, 6, 1))
                          return 0;
                      return 1;
               }
               else if(toCol == 2 && !whiteKingMoved && !whiteQueenRookMoved &&
                       board[0][3] == 0 && board[0][2] == 0 && board[0][1] == 0 && board[0][0] == white_rook) {
                      // For queenside, ensure squares d1 and c1 are not attacked.
-                     if(isSquareAttacked(0, 3, 1) || isSquareAttacked(0, 2, 1))
+                     if(isSquareAttackedBB(0, 3, 1) || isSquareAttackedBB(0, 2, 1))
                          return 0;
                      return 1;
               }
@@ -292,14 +367,14 @@ int isKingMove(wchar_t piece, int fromRow, int fromCol, int toRow, int toCol) {
               if(toCol == 6 && !blackKingMoved && !blackKingRookMoved &&
                  board[7][5] == 0 && board[7][6] == 0 && board[7][7] == black_rook) {
                      // For kingside, ensure squares f8 and g8 are not attacked.
-                     if(isSquareAttacked(7, 5, 0) || isSquareAttacked(7, 6, 0))
+                     if(isSquareAttackedBB(7, 5, 0) || isSquareAttackedBB(7, 6, 0))
                          return 0;
                      return 1;
               }
               else if(toCol == 2 && !blackKingMoved && !blackQueenRookMoved &&
                       board[7][3] == 0 && board[7][2] == 0 && board[7][1] == 0 && board[7][0] == black_rook) {
                      // For queenside, ensure squares d8 and c8 are not attacked.
-                     if(isSquareAttacked(7, 3, 0) || isSquareAttacked(7, 2, 0))
+                     if(isSquareAttackedBB(7, 3, 0) || isSquareAttackedBB(7, 2, 0))
                          return 0;
                      return 1;
               }
@@ -459,5 +534,7 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
         stalemateFlag = 1;
         return;
     }
-}
 
+    // Update bitboards after move
+    updateBitboards();
+}

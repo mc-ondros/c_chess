@@ -59,6 +59,7 @@ int main(void) {
 
     // Initialize game state and launch the GUI with the selected game mode
     createBoard();
+    initBitboards();
     startGui(gameMode);
 
     // Removed console-based game loop and board printing.

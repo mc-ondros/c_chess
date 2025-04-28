@@ -39,6 +39,14 @@ unsigned long long computeBoardHash();
 void recordPositionHash();
 int isThreefoldRepetition();
 
+// --- Bitboard representation for speed optimization ---
+typedef unsigned long long Bitboard;
+extern Bitboard bitboards[12]; // 0-5: white, 6-11: black (K,Q,R,B,N,P)
+void updateBitboards();
+void initBitboards();
+int isSquareOccupied(int row, int col);
+int isSquareAttackedBB(int row, int col, int defenderIsWhite);
+
 // Board manipulation and movement functions
 void createBoard();
 void printBoard();
