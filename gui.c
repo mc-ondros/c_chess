@@ -86,6 +86,20 @@ static void show_fifty_move_draw_message(GtkWindow *parent) {
     gtk_widget_destroy(dialog);
 }
 
+// Function to display threefold repetition draw message
+static void show_threefold_draw_message(GtkWindow *parent) {
+    GtkWidget *dialog = gtk_message_dialog_new(
+        parent,
+        GTK_DIALOG_MODAL,
+        GTK_MESSAGE_INFO,
+        GTK_BUTTONS_OK,
+        "Draw by threefold repetition! The same position has occurred three times."
+    );
+    gtk_window_set_title(GTK_WINDOW(dialog), "Threefold Repetition Draw");
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+}
+
 // Update the board UI based on the global board array
 static void refresh_board() {
     wchar_t piece_str[2] = {0, 0}; // Buffer for single wide character + null terminator
@@ -150,6 +164,16 @@ static void refresh_board() {
             }
         }
         show_fifty_move_draw_message(parent);
+        stalemateFlag = 0;
+    }
+    else if (stalemateFlag && isThreefoldRepetition()) {
+        // Threefold repetition draw
+        for (int r = 0; r < BOARD_SIZE; r++) {
+            for (int c = 0; c < BOARD_SIZE; c++) {
+                gtk_widget_set_sensitive(buttons[r][c], FALSE);
+            }
+        }
+        show_threefold_draw_message(parent);
         stalemateFlag = 0;
     }
     else if (checkMateFlag) {
@@ -576,3 +600,4 @@ void startGui(int mode) {
     gtk_widget_show_all(window);
     gtk_main();
 }
+

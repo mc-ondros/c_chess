@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdint.h>
 #include "chess.h"
 
 // Add global flags for GUI notifications of special moves and states
@@ -14,6 +15,10 @@ int stalemateFlag = 0;
 
 // 50-move rule counter
 int fiftyMoveCounter = 0;
+
+// Threefold repetition tracking
+unsigned long long positionHashes[MAX_REPETITIONS];
+int repetitionCount = 0;
 
 // Helper functions for piece identification
 int isPieceWhite(wchar_t piece) {
@@ -52,6 +57,38 @@ static int isSquareAttacked(int row, int col, int defenderIsWhite) {
 // Function to check for 50-move rule draw
 int isFiftyMoveRuleDraw() {
     return fiftyMoveCounter >= 100;
+}
+
+// Simple board hash: XOR all pieces and castling/en passant state
+unsigned long long computeBoardHash() {
+    unsigned long long hash = 0xcbf29ce484222325ULL; // FNV offset basis
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            hash ^= (unsigned long long)board[row][col] + 0x9e3779b9 + (hash << 6) + (hash >> 2);
+        }
+    }
+    // Include castling rights and en passant
+    hash ^= (whiteKingMoved << 1) | (whiteKingRookMoved << 2) | (whiteQueenRookMoved << 3);
+    hash ^= (blackKingMoved << 4) | (blackKingRookMoved << 5) | (blackQueenRookMoved << 6);
+    hash ^= ((enPassantTargetRow & 0xF) << 8) | ((enPassantTargetCol & 0xF) << 12);
+    return hash;
+}
+
+void recordPositionHash() {
+    if (repetitionCount < MAX_REPETITIONS) {
+        positionHashes[repetitionCount++] = computeBoardHash();
+    }
+}
+
+int isThreefoldRepetition() {
+    unsigned long long current = computeBoardHash();
+    int count = 0;
+    for (int i = 0; i < repetitionCount; ++i) {
+        if (positionHashes[i] == current) {
+            count++;
+        }
+    }
+    return count >= 3;
 }
 
 // Function to record a move in chess notation
@@ -409,9 +446,18 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
         stalemateFlag = 1;
     }
 
+    // Record position hash for threefold repetition
+    recordPositionHash();
+
     // Check for 50-move rule draw
     if (isFiftyMoveRuleDraw()) {
         stalemateFlag = 1;
         return;
     }
+    // Check for threefold repetition draw
+    if (isThreefoldRepetition()) {
+        stalemateFlag = 1;
+        return;
+    }
 }
+

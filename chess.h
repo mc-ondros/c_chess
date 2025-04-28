@@ -13,8 +13,8 @@
 #define black_king   0x265A // ♚
 #define black_queen  0x265B // ♛
 #define black_rook   0x265C // ♜
-#define black_bishop 0x265D // ♝
-#define black_knight 0x265E // ♞
+#define black_bishop  0x265D // ♝
+#define black_knight  0x265E // ♞
 #define black_pawn   0x265F // ♟
 
 // The global board
@@ -30,6 +30,14 @@ extern int enPassantTargetRow, enPassantTargetCol;
 
 // 50-move rule counter
 extern int fiftyMoveCounter;
+
+// Threefold repetition
+#define MAX_REPETITIONS 512
+extern unsigned long long positionHashes[MAX_REPETITIONS];
+extern int repetitionCount;
+unsigned long long computeBoardHash();
+void recordPositionHash();
+int isThreefoldRepetition();
 
 // Board manipulation and movement functions
 void createBoard();
