@@ -28,6 +28,9 @@ extern int whiteKingMoved, whiteKingRookMoved, whiteQueenRookMoved;
 extern int blackKingMoved, blackKingRookMoved, blackQueenRookMoved;
 extern int enPassantTargetRow, enPassantTargetCol;
 
+// 50-move rule counter
+extern int fiftyMoveCounter;
+
 // Board manipulation and movement functions
 void createBoard();
 void printBoard();
@@ -53,6 +56,9 @@ int moveWouldExposeCheck(int fromRow, int fromCol, int toRow, int toCol, int pla
 int hasLegalMoves(int playerIsWhite);
 int isCheckMate(int playerIsWhite);
 int isStaleMate(int playerIsWhite);
+
+// Function to check for 50-move rule draw
+int isFiftyMoveRuleDraw();
 
 // Save/Load functions
 int saveGame(const char* filename);

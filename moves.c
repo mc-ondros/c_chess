@@ -12,6 +12,9 @@ int checkFlag = 0;
 int checkMateFlag = 0;
 int stalemateFlag = 0;
 
+// 50-move rule counter
+int fiftyMoveCounter = 0;
+
 // Helper functions for piece identification
 int isPieceWhite(wchar_t piece) {
     return piece >= white_king && piece <= white_pawn;
@@ -44,6 +47,11 @@ static int isSquareAttacked(int row, int col, int defenderIsWhite) {
         }
     }
     return 0;
+}
+
+// Function to check for 50-move rule draw
+int isFiftyMoveRuleDraw() {
+    return fiftyMoveCounter >= 100;
 }
 
 // Function to record a move in chess notation
@@ -308,6 +316,14 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
     wchar_t movedPiece = board[fromRow][fromCol];
     wchar_t targetPiece = board[toRow][toCol];
 
+    // --- 50-move rule logic ---
+    // Reset counter if pawn move or capture, else increment
+    if ((movedPiece == white_pawn || movedPiece == black_pawn) || (targetPiece != 0)) {
+        fiftyMoveCounter = 0;
+    } else {
+        fiftyMoveCounter++;
+    }
+
     // For pawns: set en passant target if moving two squares, else reset targets
     if((movedPiece == white_pawn && (toRow - fromRow) == 2) ||
        (movedPiece == black_pawn && (fromRow - toRow) == 2)) {
@@ -392,5 +408,10 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
     } else if (isStaleMate(opponentIsWhite)) {
         stalemateFlag = 1;
     }
-}
 
+    // Check for 50-move rule draw
+    if (isFiftyMoveRuleDraw()) {
+        stalemateFlag = 1;
+        return;
+    }
+}
