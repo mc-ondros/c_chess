@@ -19,13 +19,17 @@ int main(void) {
     // Set the API key - replace this with your actual API key
     setApiKey("AIzaSyCVA-8dRIBWBXtu2EenqWVpqEVSjDkaNAU");
 
-    // Game mode selection: prompt remains for setting personality in one-player mode.
+    // Game mode selection: now with three options
     int gameMode = 0;
     _setmode(_fileno(stdout), _O_TEXT);
-    printf("Select game mode:\n1. One-Player (vs AI)\n2. Two-Player\nYour choice: ");
+    printf("Select game mode:\n");
+    printf("1. One-Player (vs Gemini AI)\n");
+    printf("2. Two-Player\n");
+    printf("3. One-Player (vs Local CPU)\n");
+    printf("Your choice: ");
     scanf("%d", &gameMode);
-    while (gameMode != 1 && gameMode != 2) {
-        printf("Invalid option. Please enter 1 or 2: ");
+    while (gameMode < 1 || gameMode > 3) {
+        printf("Invalid option. Please enter 1, 2, or 3: ");
         scanf("%d", &gameMode);
     }
     while(getchar() != '\n'); // Clear input buffer
@@ -50,9 +54,11 @@ int main(void) {
         }
         setAiPersonality(personality);
         printf("Black player set to '%s' personality.\n", personality);
-    } else {
+    } else if (gameMode == 2) {
         printf("Two-Player mode selected. Both moves will be input by players.\n\n");
         printf("Players must alternate turns - White goes first.\n");
+    } else if (gameMode == 3) {
+        printf("Local CPU mode selected. Black will use a minimax-based local engine.\n\n");
     }
     _setmode(_fileno(stdout), _O_U16TEXT);
 #endif

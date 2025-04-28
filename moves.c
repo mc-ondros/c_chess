@@ -538,3 +538,293 @@ void executeMove(int fromRow, int fromCol, int toRow, int toCol) {
     // Update bitboards after move
     updateBitboards();
 }
+
+// --- Local CPU (minimax with alpha-beta pruning and iterative deepening) ---
+
+// Piece-square tables (simplified, midgame, white's perspective; black is mirrored)
+static const int pawn_table[8][8] = {
+    { 0,  0,  0,  0,  0,  0,  0,  0},
+    {50, 50, 50, 50, 50, 50, 50, 50},
+    {10, 10, 20, 30, 30, 20, 10, 10},
+    { 5,  5, 10, 25, 25, 10,  5,  5},
+    { 0,  0,  0, 20, 20,  0,  0,  0},
+    { 5, -5,-10,  0,  0,-10, -5,  5},
+    { 5, 10, 10,-20,-20, 10, 10,  5},
+    { 0,  0,  0,  0,  0,  0,  0,  0}
+};
+static const int knight_table[8][8] = {
+    {-50,-40,-30,-30,-30,-30,-40,-50},
+    {-40,-20,  0,  0,  0,  0,-20,-40},
+    {-30,  0, 10, 15, 15, 10,  0,-30},
+    {-30,  5, 15, 20, 20, 15,  5,-30},
+    {-30,  0, 15, 20, 20, 15,  0,-30},
+    {-30,  5, 10, 15, 15, 10,  5,-30},
+    {-40,-20,  0,  5,  5,  0,-20,-40},
+    {-50,-40,-30,-30,-30,-30,-40,-50}
+};
+static const int bishop_table[8][8] = {
+    {-20,-10,-10,-10,-10,-10,-10,-20},
+    {-10,  0,  0,  0,  0,  0,  0,-10},
+    {-10,  0,  5, 10, 10,  5,  0,-10},
+    {-10,  5,  5, 10, 10,  5,  5,-10},
+    {-10,  0, 10, 10, 10, 10,  0,-10},
+    {-10, 10, 10, 10, 10, 10, 10,-10},
+    {-10,  5,  0,  0,  0,  0,  5,-10},
+    {-20,-10,-10,-10,-10,-10,-10,-20}
+};
+static const int rook_table[8][8] = {
+    { 0,  0,  0,  0,  0,  0,  0,  0},
+    { 5, 10, 10, 10, 10, 10, 10,  5},
+    {-5,  0,  0,  0,  0,  0,  0, -5},
+    {-5,  0,  0,  0,  0,  0,  0, -5},
+    {-5,  0,  0,  0,  0,  0,  0, -5},
+    {-5,  0,  0,  0,  0,  0,  0, -5},
+    {-5,  0,  0,  0,  0,  0,  0, -5},
+    { 0,  0,  0,  5,  5,  0,  0,  0}
+};
+static const int queen_table[8][8] = {
+    {-20,-10,-10, -5, -5,-10,-10,-20},
+    {-10,  0,  0,  0,  0,  0,  0,-10},
+    {-10,  0,  5,  5,  5,  5,  0,-10},
+    { -5,  0,  5,  5,  5,  5,  0, -5},
+    {  0,  0,  5,  5,  5,  5,  0, -5},
+    {-10,  5,  5,  5,  5,  5,  0,-10},
+    {-10,  0,  5,  0,  0,  0,  0,-10},
+    {-20,-10,-10, -5, -5,-10,-10,-20}
+};
+static const int king_table[8][8] = {
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-30,-40,-40,-50,-50,-40,-40,-30},
+    {-20,-30,-30,-40,-40,-30,-30,-20},
+    {-10,-20,-20,-20,-20,-20,-20,-10},
+    { 20, 20,  0,  0,  0,  0, 20, 20},
+    { 20, 30, 10,  0,  0, 10, 30, 20}
+};
+
+// Helper for mirroring tables for black
+static inline int mirror_row(int row) { return 7 - row; }
+
+// Refined evaluation function using Shannon's formula and piece-square tables
+static int evaluateBoard() {
+    // Piece values
+    const int PAWN_VALUE = 100;
+    const int KNIGHT_VALUE = 320;
+    const int BISHOP_VALUE = 330;
+    const int ROOK_VALUE = 500;
+    const int QUEEN_VALUE = 900;
+    const int KING_VALUE = 20000;
+
+    int score = 0;
+
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            wchar_t piece = board[row][col];
+            if (piece == 0) continue;
+            int value = 0, psq = 0;
+            switch (piece) {
+                case white_pawn:
+                    value = PAWN_VALUE;
+                    psq = pawn_table[row][col];
+                    break;
+                case black_pawn:
+                    value = -PAWN_VALUE;
+                    psq = -pawn_table[mirror_row(row)][col];
+                    break;
+                case white_knight:
+                    value = KNIGHT_VALUE;
+                    psq = knight_table[row][col];
+                    break;
+                case black_knight:
+                    value = -KNIGHT_VALUE;
+                    psq = -knight_table[mirror_row(row)][col];
+                    break;
+                case white_bishop:
+                    value = BISHOP_VALUE;
+                    psq = bishop_table[row][col];
+                    break;
+                case black_bishop:
+                    value = -BISHOP_VALUE;
+                    psq = -bishop_table[mirror_row(row)][col];
+                    break;
+                case white_rook:
+                    value = ROOK_VALUE;
+                    psq = rook_table[row][col];
+                    break;
+                case black_rook:
+                    value = -ROOK_VALUE;
+                    psq = -rook_table[mirror_row(row)][col];
+                    break;
+                case white_queen:
+                    value = QUEEN_VALUE;
+                    psq = queen_table[row][col];
+                    break;
+                case black_queen:
+                    value = -QUEEN_VALUE;
+                    psq = -queen_table[mirror_row(row)][col];
+                    break;
+                case white_king:
+                    value = KING_VALUE;
+                    psq = king_table[row][col];
+                    break;
+                case black_king:
+                    value = -KING_VALUE;
+                    psq = -king_table[mirror_row(row)][col];
+                    break;
+            }
+            score += value + psq;
+        }
+    }
+
+    // Optionally, add simple bonuses/penalties for castling rights, doubled pawns, etc.
+
+    // Checkmate/stalemate detection for terminal positions
+    if (isCheckMate(0)) return -100000; // White is checkmated
+    if (isCheckMate(1)) return 100000;  // Black is checkmated
+    if (isStaleMate(0) || isStaleMate(1)) return 0; // Draw
+
+    return score;
+}
+
+// Move representation for fast move generation
+typedef struct {
+    int fromRow, fromCol, toRow, toCol;
+    int captureValue; // For move ordering: higher is better
+} Move;
+
+// Generate all legal moves for a player (0=white, 1=black), returns count
+static int generateLegalMoves(int playerIsWhite, Move moves[], int maxMoves) {
+    int count = 0;
+    for (int fr = 0; fr < 8; ++fr) {
+        for (int fc = 0; fc < 8; ++fc) {
+            wchar_t piece = board[fr][fc];
+            if (piece == 0) continue;
+            if (playerIsWhite ? !isPieceWhite(piece) : !isPieceBlack(piece)) continue;
+            for (int tr = 0; tr < 8; ++tr) {
+                for (int tc = 0; tc < 8; ++tc) {
+                    if (fr == tr && fc == tc) continue;
+                    wchar_t target = board[tr][tc];
+                    if ((playerIsWhite && isPieceWhite(target)) || (!playerIsWhite && isPieceBlack(target)))
+                        continue;
+                    if (!isValidMove(fr, fc, tr, tc)) continue;
+                    if (moveWouldExposeCheck(fr, fc, tr, tc, playerIsWhite)) continue;
+                    // Don't allow capturing the king (illegal in chess)
+                    if (target == white_king || target == black_king) continue;
+                    if (count < maxMoves) {
+                        moves[count].fromRow = fr;
+                        moves[count].fromCol = fc;
+                        moves[count].toRow = tr;
+                        moves[count].toCol = tc;
+                        // Prefer captures for move ordering
+                        moves[count].captureValue = 0;
+                        if (target != 0) {
+                            // Assign higher value for capturing more valuable pieces
+                            if (target == white_queen || target == black_queen) moves[count].captureValue = 9;
+                            else if (target == white_rook || target == black_rook) moves[count].captureValue = 5;
+                            else if (target == white_bishop || target == black_bishop ||
+                                     target == white_knight || target == black_knight) moves[count].captureValue = 3;
+                            else if (target == white_pawn || target == black_pawn) moves[count].captureValue = 1;
+                        }
+                        count++;
+                    }
+                }
+            }
+        }
+    }
+    return count;
+}
+
+// Sort moves by capture value (descending) for better alpha-beta pruning
+static void sortMoves(Move moves[], int count) {
+    for (int i = 0; i < count - 1; ++i) {
+        for (int j = i + 1; j < count; ++j) {
+            if (moves[j].captureValue > moves[i].captureValue) {
+                Move tmp = moves[i];
+                moves[i] = moves[j];
+                moves[j] = tmp;
+            }
+        }
+    }
+}
+
+// Minimax with alpha-beta pruning, depth-limited, using fast move generation
+static int minimax(int depth, int maximizingPlayer, int alpha, int beta) {
+    // Terminal state: checkmate, stalemate, or depth limit
+    if (depth == 0 || isCheckMate(0) || isCheckMate(1) || isStaleMate(0) || isStaleMate(1)) {
+        return evaluateBoard();
+    }
+
+    Move moves[128];
+    int moveCount = generateLegalMoves(maximizingPlayer ? 1 : 0, moves, 128);
+    if (moveCount == 0) return evaluateBoard();
+    sortMoves(moves, moveCount);
+
+    int bestScore = maximizingPlayer ? -10000 : 10000;
+    for (int i = 0; i < moveCount; ++i) {
+        int fr = moves[i].fromRow, fc = moves[i].fromCol, tr = moves[i].toRow, tc = moves[i].toCol;
+        wchar_t savedFrom = board[fr][fc];
+        wchar_t savedTo = board[tr][tc];
+        board[tr][tc] = savedFrom;
+        board[fr][fc] = 0;
+        int score = minimax(depth - 1, !maximizingPlayer, alpha, beta);
+        board[fr][fc] = savedFrom;
+        board[tr][tc] = savedTo;
+        if (maximizingPlayer) {
+            if (score > bestScore) bestScore = score;
+            if (score > alpha) alpha = score;
+            if (beta <= alpha) break;
+        } else {
+            if (score < bestScore) bestScore = score;
+            if (score < beta) beta = score;
+            if (beta <= alpha) break;
+        }
+    }
+    return bestScore;
+}
+
+// Iterative deepening wrapper for minimax, optimized for speed
+void getLocalCPUMove(int *fromRow, int *fromCol, int *toRow, int *toCol) {
+    Move moves[128];
+    int bestScore = 10000;
+    int found = 0;
+    int bestIdx = -1;
+    int maxDepth = 3; // Lowered for faster response (increase for stronger play)
+    int moveCount = generateLegalMoves(0, moves, 128);
+    if (moveCount == 0) return;
+    sortMoves(moves, moveCount);
+
+    // Search at increasing depth, always keep best move found so far
+    for (int depth = 1; depth <= maxDepth; ++depth) {
+        found = 0;
+        bestScore = 10000;
+        for (int i = 0; i < moveCount; ++i) {
+            int fr = moves[i].fromRow, fc = moves[i].fromCol, tr = moves[i].toRow, tc = moves[i].toCol;
+            wchar_t savedFrom = board[fr][fc];
+            wchar_t savedTo = board[tr][tc];
+            board[tr][tc] = savedFrom;
+            board[fr][fc] = 0;
+            int score = minimax(depth - 1, 1, -10000, 10000);
+            board[fr][fc] = savedFrom;
+            board[tr][tc] = savedTo;
+            if (!found || score < bestScore) {
+                bestScore = score;
+                bestIdx = i;
+                found = 1;
+            }
+        }
+        if (!found) break;
+    }
+    if (found && bestIdx >= 0) {
+        *fromRow = moves[bestIdx].fromRow;
+        *fromCol = moves[bestIdx].fromCol;
+        *toRow = moves[bestIdx].toRow;
+        *toCol = moves[bestIdx].toCol;
+        return;
+    }
+    // Fallback: pick first legal move
+    *fromRow = moves[0].fromRow;
+    *fromCol = moves[0].fromCol;
+    *toRow = moves[0].toRow;
+    *toCol = moves[0].toCol;
+}

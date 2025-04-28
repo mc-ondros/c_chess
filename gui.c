@@ -26,6 +26,9 @@ static int aiThinking = 0;
 // AI retry counter
 static int aiRetryCount = 0;
 
+// Forward declaration for local AI move
+static gboolean process_local_cpu_move(gpointer data);
+
 // Function to display check message
 static void show_check_message(GtkWindow *parent, int currentPlayerInCheck) {
     const char *playerColor = currentPlayerInCheck ? "Black" : "White";
@@ -148,6 +151,12 @@ static void refresh_board() {
     } else if (gameMode == 1) {
         if (aiThinking) {
             gtk_label_set_text(GTK_LABEL(turnLabel), "AI is thinking...");
+        } else {
+            gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
+        }
+    } else if (gameMode == 3) {
+        if (aiThinking) {
+            gtk_label_set_text(GTK_LABEL(turnLabel), "CPU is thinking...");
         } else {
             gtk_label_set_text(GTK_LABEL(turnLabel), "Your turn: White");
         }
@@ -289,6 +298,25 @@ static gboolean process_ai_move(gpointer data) {
     return FALSE; // Return FALSE to remove the timeout
 }
 
+// Local CPU (minimax) move processing
+static gboolean process_local_cpu_move(gpointer data) {
+    extern void getLocalCPUMove(int *fromRow, int *fromCol, int *toRow, int *toCol);
+    int fromRow, fromCol, toRow, toCol;
+    getLocalCPUMove(&fromRow, &fromCol, &toRow, &toCol);
+    wchar_t selectedPiece = board[fromRow][fromCol];
+    if (selectedPiece == 0 || !isPieceBlack(selectedPiece) || !isValidMove(fromRow, fromCol, toRow, toCol) ||
+        moveWouldExposeCheck(fromRow, fromCol, toRow, toCol, 0)) {
+        // No valid move found (should not happen unless checkmate/stalemate)
+        aiThinking = 0;
+        refresh_board();
+        return FALSE;
+    }
+    executeMove(fromRow, fromCol, toRow, toCol);
+    aiThinking = 0;
+    refresh_board();
+    return FALSE;
+}
+
 // Callback function for when a board square button is clicked
 static void on_button_clicked(GtkWidget *widget, gpointer data) {
     // Retrieve the row and column from the passed data
@@ -377,9 +405,12 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
                 aiThinking = 1;
                 aiRetryCount = 0;  // Reset retry counter for new AI turn
                 refresh_board();
-                
-                // Use a timeout to allow the UI to update before processing the AI move
                 g_timeout_add(500, process_ai_move, NULL);
+            } else if (gameMode == 3) {
+                // Local CPU mode: call minimax AI for black
+                aiThinking = 1;
+                refresh_board();
+                g_timeout_add(500, process_local_cpu_move, NULL);
             }
         } else {
             GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_OK, "Invalid move.");
@@ -600,4 +631,3 @@ void startGui(int mode) {
     gtk_widget_show_all(window);
     gtk_main();
 }
-
