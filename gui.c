@@ -421,34 +421,57 @@ static void on_button_clicked(GtkWidget *widget, gpointer data) {
     }
 }
 
-// Modified callback: parses the last move from moveHistory, calls rateMoveWithAI, and displays the rating result.
+// Modified callback: parses the correct move to rate depending on game mode.
 static void on_rate_move_clicked(GtkWidget *widget, gpointer data) {
     // Create a local copy to avoid modifying global moveHistory
     char copyHistory[4096];
     strcpy(copyHistory, moveHistory);
-    char *token = NULL, *lastToken = NULL;
+    char *token = NULL, *lastToken = NULL, *secondLastToken = NULL;
     token = strtok(copyHistory, " ");
     while(token) {
+        secondLastToken = lastToken;
         lastToken = token;
         token = strtok(NULL, " ");
     }
-    if (!lastToken) {
-        GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
-                                                    GTK_BUTTONS_OK, "No move to rate.");
-        gtk_window_set_title(GTK_WINDOW(dialog), "Rate Move");
-        gtk_dialog_run(GTK_DIALOG(dialog));
-        gtk_widget_destroy(dialog);
-        return;
+
+    int modeToRate = gameMode;
+    if (modeToRate == 1 || modeToRate == 3) {
+        // One-player vs Gemini or Local CPU: rate the move before the last (white's last move)
+        if (!secondLastToken) {
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                        GTK_BUTTONS_OK, "No move to rate.");
+            gtk_window_set_title(GTK_WINDOW(dialog), "Rate Move");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            return;
+        }
+        int rating = rateMoveWithAI(secondLastToken, moveHistory);
+        char message[256];
+        sprintf(message, "Rating for move %s: %d", secondLastToken, rating);
+        GtkWidget *resultDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                         GTK_BUTTONS_OK, "%s", message);
+        gtk_window_set_title(GTK_WINDOW(resultDialog), "Move Rating");
+        gtk_dialog_run(GTK_DIALOG(resultDialog));
+        gtk_widget_destroy(resultDialog);
+    } else {
+        // Two-player: rate the last move
+        if (!lastToken) {
+            GtkWidget *dialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                        GTK_BUTTONS_OK, "No move to rate.");
+            gtk_window_set_title(GTK_WINDOW(dialog), "Rate Move");
+            gtk_dialog_run(GTK_DIALOG(dialog));
+            gtk_widget_destroy(dialog);
+            return;
+        }
+        int rating = rateMoveWithAI(lastToken, moveHistory);
+        char message[256];
+        sprintf(message, "Rating for move %s: %d", lastToken, rating);
+        GtkWidget *resultDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
+                                                         GTK_BUTTONS_OK, "%s", message);
+        gtk_window_set_title(GTK_WINDOW(resultDialog), "Move Rating");
+        gtk_dialog_run(GTK_DIALOG(resultDialog));
+        gtk_widget_destroy(resultDialog);
     }
-    // Call API functionality to rate the move
-    int rating = rateMoveWithAI(lastToken, moveHistory);
-    char message[256];
-    sprintf(message, "Rating for move %s: %d", lastToken, rating);
-    GtkWidget *resultDialog = gtk_message_dialog_new(NULL, GTK_DIALOG_MODAL, GTK_MESSAGE_INFO,
-                                                     GTK_BUTTONS_OK, "%s", message);
-    gtk_window_set_title(GTK_WINDOW(resultDialog), "Move Rating");
-    gtk_dialog_run(GTK_DIALOG(resultDialog));
-    gtk_widget_destroy(resultDialog);
 }
 
 // New callback for saving the game.
@@ -631,3 +654,4 @@ void startGui(int mode) {
     gtk_widget_show_all(window);
     gtk_main();
 }
+
