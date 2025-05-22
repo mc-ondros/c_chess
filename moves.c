@@ -607,7 +607,7 @@ static const int king_table[8][8] = {
 static inline int mirror_row(int row) { return 7 - row; }
 
 // Refined evaluation function using Shannon's formula and piece-square tables
-static int evaluateBoard() {
+int evaluateBoard() {
     // Piece values
     const int PAWN_VALUE = 100;
     const int KNIGHT_VALUE = 320;
@@ -828,3 +828,4 @@ void getLocalCPUMove(int *fromRow, int *fromCol, int *toRow, int *toCol) {
     *toRow = moves[0].toRow;
     *toCol = moves[0].toCol;
 }
+

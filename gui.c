@@ -25,9 +25,13 @@ static GtkWidget *turnLabel;
 static int aiThinking = 0;
 // AI retry counter
 static int aiRetryCount = 0;
+// Global pointer for the evaluation label
+static GtkWidget *evalLabel = NULL;
 
 // Forward declaration for local AI move
 static gboolean process_local_cpu_move(gpointer data);
+// Forward declaration for evaluateBoard
+int evaluateBoard(void);
 
 // Function to display check message
 static void show_check_message(GtkWindow *parent, int currentPlayerInCheck) {
@@ -209,6 +213,45 @@ static void refresh_board() {
         // Current player's king is in check
         show_check_message(parent, currentPlayer);
         checkFlag = 0; // Reset flag after showing message
+    }
+
+    // --- Static evaluation display ---
+    if (evalLabel) {
+        int eval = evaluateBoard();
+        int whiteScore = 0, blackScore = 0;
+        // Calculate scores for each side
+        for (int row = 0; row < 8; ++row) {
+            for (int col = 0; col < 8; ++col) {
+                wchar_t piece = board[row][col];
+                switch (piece) {
+                    case white_pawn:   whiteScore += 100; break;
+                    case white_knight: whiteScore += 320; break;
+                    case white_bishop: whiteScore += 330; break;
+                    case white_rook:   whiteScore += 500; break;
+                    case white_queen:  whiteScore += 900; break;
+                    case white_king:   whiteScore += 20000; break;
+                    case black_pawn:   blackScore += 100; break;
+                    case black_knight: blackScore += 320; break;
+                    case black_bishop: blackScore += 330; break;
+                    case black_rook:   blackScore += 500; break;
+                    case black_queen:  blackScore += 900; break;
+                    case black_king:   blackScore += 20000; break;
+                }
+            }
+        }
+        gchar *evalText;
+        if (eval > 10000) {
+            evalText = g_strdup_printf("Current Evaluation: White wins by checkmate\nWhite: %d   Black: %d", whiteScore, blackScore);
+        } else if (eval < -10000) {
+            evalText = g_strdup_printf("Current Evaluation: Black wins by checkmate\nWhite: %d   Black: %d", whiteScore, blackScore);
+        } else if (eval == 0) {
+            evalText = g_strdup_printf("Current Evaluation: Equal (0)\nWhite: %d   Black: %d", whiteScore, blackScore);
+        } else {
+            evalText = g_strdup_printf("Current Evaluation: White %s%d\nWhite: %d   Black: %d   (Diff: %d)",
+                eval > 0 ? "+" : "", eval, whiteScore, blackScore, whiteScore - blackScore);
+        }
+        gtk_label_set_text(GTK_LABEL(evalLabel), evalText);
+        g_free(evalText);
     }
 }
 
@@ -622,6 +665,11 @@ void startGui(int mode) {
     turnLabel = gtk_label_new("Current turn: White");
     gtk_widget_set_halign(turnLabel, GTK_ALIGN_CENTER);
     gtk_box_pack_start(GTK_BOX(vbox), turnLabel, FALSE, FALSE, 5);
+
+    // --- Add static evaluation label ---
+    evalLabel = gtk_label_new("Current evaluation: ");
+    gtk_widget_set_halign(evalLabel, GTK_ALIGN_CENTER);
+    gtk_box_pack_start(GTK_BOX(vbox), evalLabel, FALSE, FALSE, 5);
 
     GtkWidget *grid = create_board_grid();
     gtk_box_pack_start(GTK_BOX(vbox), grid, TRUE, TRUE, 0);

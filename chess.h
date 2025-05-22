@@ -68,6 +68,9 @@ void printMoveHistory();
 // Local CPU (minimax) move function
 void getLocalCPUMove(int *fromRow, int *fromCol, int *toRow, int *toCol);
 
+// Static evaluation function
+int evaluateBoard();
+
 // Check-related functions (defined in check.c)
 int findKing(int playerIsWhite, int *kingRow, int *kingCol);
 int isKingInCheck(int playerIsWhite);
@@ -84,4 +87,3 @@ int saveGame(const char* filename);
 int loadGame(const char* filename);
 
 #endif //C_CHESS_CHESS_H
-
